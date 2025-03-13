@@ -1,6 +1,7 @@
 import TokenPairSelector from "@/components/TokenPairSelector";
 import Navbar from "../components/navbar";
 import SelectedTokenPairDetails from "@/components/SelectedTokenPairDetails";
+import Tables from "@/components/tables";
 
 export default function Home() {
   return (
@@ -16,6 +17,9 @@ export default function Home() {
           <TokenPairSelector />
           {/* TODO: fix this gradient properly */}
           {/* <Gradient /> */}
+        </div>
+        <div className="mb-20">
+          <Tables />
         </div>
       </div>
     </main>
