@@ -24,7 +24,12 @@ const columns = [
     header: "Position",
     cell: (info) => (
       <div className="pl-6 py-2">
-        <div className="flex items-center flex-row gap-2 border px-[12px] py-[6px] rounded-md w-fit border-[#1A1A1A]">
+        <div
+          className={cn(
+            "flex items-center flex-row gap-2 border px-[12px] py-[6px] rounded-md w-fit border-[#1A1A1A]",
+            info.getValue() ? "text-[#16C784]" : "text-[#EC5058]"
+          )}
+        >
           {info.getValue() ? <LongIcon /> : <ShortIcon />}
           <div className="flex flex-col gap-[2px]">
             <div className="flex flex-row gap-1 items-center">
@@ -34,7 +39,9 @@ const columns = [
                 width={12}
                 height={12}
               />
-              <span className="text-sm">{info.row.original.token.symbol}</span>
+              <span className="text-sm text-white">
+                {info.row.original.token.symbol}
+              </span>
             </div>
             <span
               className={`text-[10px] uppercase font-semibold opacity-50 ${

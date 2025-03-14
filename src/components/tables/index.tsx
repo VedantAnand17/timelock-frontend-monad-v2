@@ -63,7 +63,7 @@ export default function Tables() {
         </span>
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto overflow-hidden">
         <table className="w-full">
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -79,7 +79,7 @@ export default function Tables() {
                       ? null
                       : flexRender(
                           header.column.columnDef.header,
-                          header.getContext()
+                          header.getContext(),
                         )}
                   </th>
                 ))}
