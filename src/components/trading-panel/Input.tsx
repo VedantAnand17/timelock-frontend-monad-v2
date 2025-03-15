@@ -28,12 +28,12 @@ const Input = () => {
         </span>
       </div>
       <div className="flex flex-row gap-2 items-start">
-        <div className="flex items-center gap-[6px] justify-center rounded-md bg-[#0D0D0D] h-[36px] px-[12px]">
+        <div className="flex items-center gap-[6px] text-sm justify-center rounded-md bg-[#0D0D0D] h-[36px] px-[12px]">
           <Image
             src={selectedTokenPair[0].image}
             alt={selectedTokenPair[0].symbol}
-            width={18}
-            height={18}
+            width={16}
+            height={16}
           />
           {selectedTokenPair[0].symbol}
         </div>
