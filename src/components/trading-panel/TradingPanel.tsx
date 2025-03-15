@@ -38,8 +38,10 @@ export default function TradingPanel() {
           </TabsList>
         </Tabs>
       </div>
-      <div className="flex justify-end my-5 cursor-pointer">
-        <SettingsIcon />
+      <div className="flex w-full justify-end my-5">
+        <button className="cursor-pointer">
+          <SettingsIcon />
+        </button>
       </div>
       <TradingForm isLong={tabValue === TabValue.LONG} />
     </div>

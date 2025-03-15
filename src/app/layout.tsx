@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Provider } from "@/providers/Providers";
+import { ReactScan } from "@/components/ReactScan";
 
 // TODO: Replace with the correct font later
 const geistSans = Geist({
@@ -27,6 +28,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      {process.env.NODE_ENV === "development" && <ReactScan />}
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
