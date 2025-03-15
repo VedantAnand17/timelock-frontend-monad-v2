@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 
 export default function TradeExecutionDetails() {
   return (
-    <Accordion type="single" collapsible>
+    <Accordion type="single" collapsible className="min-h-[193px]">
       <AccordionItem value="item-1">
         <AccordionTrigger className="cursor-pointer text-[#9CA3AF] text-sm font-medium border border-[#282324] rounded-md px-4 bg-[#1a1a1a80]">
           Show Details

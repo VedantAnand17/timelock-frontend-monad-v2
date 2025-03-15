@@ -1,16 +1,31 @@
 import { preventMinusAndEKey, preventPasteNegative } from "@/lib/helper";
 import { useSelectedTokenPair } from "@/providers/SelectedTokenPairProvider";
+import type { AnyFieldApi } from "@tanstack/react-form";
 import Image from "next/image";
+import { useEffect, useRef } from "react";
 
-const Input = () => {
+const Input = ({ field }: { field: AnyFieldApi }) => {
   const { selectedTokenPair } = useSelectedTokenPair();
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, []);
 
   return (
     <div className="p-[12px_10px_12px_16px] flex gap-1 flex-row rounded-xl border border-[#282324] bg-[#1a1a1a80]">
       <div className="flex flex-col gap-0">
         <input
           type="number"
+          ref={inputRef}
+          autoComplete="off"
           placeholder="0"
+          id={field.name}
+          name={field.name}
+          value={field.state.value}
+          onChange={(e) => field.handleChange(e.target.value)}
           onWheel={(e) => e.preventDefault()}
           onPaste={preventPasteNegative}
           min={0.0}

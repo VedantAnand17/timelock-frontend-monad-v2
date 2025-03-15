@@ -1,14 +1,18 @@
-import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-const DurationSelector = () => {
-  const durations = ["5m", "15m", "1H", "4H", "1D", "3D"];
-  const [selectedDurationIndex, setSelectedDurationIndex] = useState("1");
-
+const DurationSelector = ({
+  durations,
+  selectedDurationIndex,
+  setSelectedDurationIndex,
+}: {
+  durations: string[];
+  selectedDurationIndex: number;
+  setSelectedDurationIndex: (index: number) => void;
+}) => {
   return (
     <Tabs
-      value={selectedDurationIndex}
-      onValueChange={(value) => setSelectedDurationIndex(value)}
+      value={selectedDurationIndex.toString()}
+      onValueChange={(value) => setSelectedDurationIndex(Number(value))}
       className=""
     >
       <TabsList className="p-[5px] h-[46px] w-full bg-[#1a1a1a80] border border-[#282324]">
