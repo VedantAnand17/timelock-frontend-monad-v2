@@ -3,6 +3,7 @@ import Navbar from "../components/navbar";
 import SelectedTokenPairDetails from "@/components/SelectedTokenPairDetails";
 import Tables from "@/components/tables";
 import TradingPanel from "@/components/trading-panel/TradingPanel";
+import Graph from "@/components/graph";
 
 export default function Home() {
   return (
@@ -14,7 +15,7 @@ export default function Home() {
           {/* TODO: check border color and corners */}
           <div className="border border-[#1A1A1A] p-4 rounded-md mt-4 relative">
             <div className="mb-4 bg-black h-[430px] flex items-center justify-center">
-              Graph here
+              <Graph />
             </div>
             <TokenPairSelector />
             {/* TODO: fix this gradient properly */}
