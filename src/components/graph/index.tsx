@@ -18,11 +18,11 @@ export default function Graph() {
 
   const defaultWidgetProps: Partial<ChartingLibraryWidgetOptions> = {
     symbol: "WETH",
-    interval: "60" as ResolutionString,
+    interval: "1D" as ResolutionString,
     library_path: "/static/charting_library/",
     locale: "en",
     charts_storage_api_version: "1.1",
-    client_id: "methlab.xyz",
+    client_id: "tradingview.com",
     user_id: "public_user_id",
     fullscreen: false,
     autosize: true,

@@ -20,7 +20,7 @@ export const TradingView = memo(
         // BEWARE: no trailing slash is expected in feed URL
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         datafeed: new (window as any).Datafeeds.UDFCompatibleDatafeed(
-          // 'https://demo-feed-data.tradingview.com',
+          //   "https://demo-feed-data.tradingview.com",
           "/api",
           undefined,
           {
@@ -28,7 +28,7 @@ export const TradingView = memo(
             expectedOrder: "latestLast",
           }
         ),
-        interval: "1" as ResolutionString,
+        interval: "1D" as ResolutionString,
         container: chartContainerRef.current,
         library_path: props.library_path,
         locale: props.locale as LanguageCode,
@@ -57,7 +57,7 @@ export const TradingView = memo(
         theme: "dark",
         custom_css_url: "./theme.css",
         custom_font_family: "Giest",
-        debug: false,
+        debug: true,
         time_scale: {
           min_bar_spacing: 30,
         },
@@ -146,7 +146,7 @@ export const TradingView = memo(
       };
     }, [props]);
 
-    return <div ref={chartContainerRef} className="h-[475px]" />;
+    return <div ref={chartContainerRef} className="h-full w-full" />;
   }
 );
 

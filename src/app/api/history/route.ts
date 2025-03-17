@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 const NETWORK_ID = "base";
 const POOL_ADDRESS = "0xd0b53D9277642d899DF5C87A3966A349A798F224";
-const TIMEFRAME = "hour";
+const TIMEFRAME = "day";
 
 export async function GET(request: Request) {
   try {
@@ -41,7 +41,7 @@ export async function GET(request: Request) {
     }
 
     const response = await fetch(
-      `https://pro-api.coingecko.com/api/v3/onchain/networks/${networkId}/pools/${poolAddress}/ohlcv/${timeframe}`,
+      `https://pro-api.coingecko.com/api/v3/onchain/networks/${networkId}/pools/${poolAddress}/ohlcv/${timeframe}?token=quote`,
       {
         headers: {
           accept: "application/json",
@@ -58,8 +58,17 @@ export async function GET(request: Request) {
     const data = (await response.json()).data.attributes.ohlcv_list;
     console.log("data", data);
 
+    // Filter data between from and to timestamps
+    const fromTimestamp = parseInt(from);
+    const toTimestamp = parseInt(to);
+
+    const filteredData = data.filter((item: number[]) => {
+      const timestamp = item[0];
+      return timestamp >= fromTimestamp && timestamp < toTimestamp;
+    });
+
     let status = "ok";
-    if (data.length === 0) {
+    if (filteredData.length === 0) {
       status = "no_data";
     }
 
@@ -69,7 +78,7 @@ export async function GET(request: Request) {
     const l = [];
     const c = [];
 
-    for (const _data of data) {
+    for (const _data of filteredData) {
       t.push(_data[0]);
       o.push(_data[1]);
       h.push(_data[2]);
@@ -78,7 +87,7 @@ export async function GET(request: Request) {
     }
 
     const barsRes = {
-      t: t,
+      t: t.reverse(),
       o: o,
       h: h,
       l: l,
