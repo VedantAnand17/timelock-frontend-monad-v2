@@ -166,4 +166,59 @@ const FlashIcon = () => (
   </svg>
 );
 
-export { ChevronDown, LongIcon, ShortIcon, SettingsIcon, FlashIcon };
+const BlueStrokeIcon = ({ className }: { className?: string }) => (
+  <svg
+    className={className}
+    width={16}
+    height={318}
+    viewBox="0 0 16 342"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M1.18018 323.471C1.18018 333.871 4.44 341.059 15.227 341.059"
+      stroke="#1981F3"
+    />
+    <path d="M1.77197 17.1392L1.18011 323.471" stroke="#1981F3" />
+    <path
+      d="M1.63525 18.2203C1.63525 8.07243 4.87126 1.05859 15.5795 1.05859"
+      stroke="#1981F3"
+    />
+  </svg>
+);
+
+const TradeTypeStrokeIcon = ({
+  isLong,
+  className,
+}: {
+  isLong: boolean;
+  className?: string;
+}) => (
+  <svg
+    width={15}
+    height={172}
+    viewBox="0 0 15 178"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+  >
+    <path
+      d="M0.958008 18.754C0.958008 8.29027 4.12013 1.05811 14.5839 1.05811"
+      stroke={!isLong ? "#EC5058" : "#137550"}
+    />
+    <path
+      d="M0.958984 17.0796L0.648176 177.983"
+      stroke={!isLong ? "#EC5058" : "#137550"}
+    />
+  </svg>
+);
+
+export {
+  ChevronDown,
+  LongIcon,
+  ShortIcon,
+  SettingsIcon,
+  FlashIcon,
+  BlueStrokeIcon,
+  TradeTypeStrokeIcon,
+};
