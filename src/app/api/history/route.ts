@@ -2,13 +2,18 @@ import { NextResponse } from "next/server";
 
 const NETWORK_ID = "base";
 const POOL_ADDRESS = "0xd0b53D9277642d899DF5C87A3966A349A798F224";
-const TIMEFRAME = "day";
+const TIMEFRAME = "minute";
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const from = searchParams.get("from");
     const to = searchParams.get("to");
+
+    if (!from || !to) {
+      return new Response(`Pass from and to parameters`, { status: 400 });
+    }
+
     const resolution = searchParams.get("resolution");
     const symbol = searchParams.get("symbol");
 
@@ -16,8 +21,8 @@ export async function GET(request: Request) {
     const poolAddress = POOL_ADDRESS;
     const timeframe = TIMEFRAME;
 
-    if (!from || !to || !resolution || !symbol) {
-      return new Response(`Pass from, to, resolution, and symbol`, {
+    if (!resolution || !symbol) {
+      return new Response(`Pass resolution and symbol`, {
         status: 400,
       });
     }
@@ -40,12 +45,21 @@ export async function GET(request: Request) {
       );
     }
 
+    // const response = await fetch(
+    //   `https://pro-api.coingecko.com/api/v3/onchain/networks/${networkId}/pools/${poolAddress}/ohlcv/${timeframe}?token=quote&before_timestamp=${to}&limit=${limit}`,
+    //   {
+    //     headers: {
+    //       accept: "application/json",
+    //       "x-cg-pro-api-key": process.env.COINGECKO_API_KEY || "",
+    //     },
+    //   }
+    // );
+
     const response = await fetch(
-      `https://pro-api.coingecko.com/api/v3/onchain/networks/${networkId}/pools/${poolAddress}/ohlcv/${timeframe}?token=quote`,
+      `${process.env.OHLC_BACKEND}/ohlc/${poolAddress}?from=${from}&to=${to}&interval=${timeframe}`,
       {
         headers: {
           accept: "application/json",
-          "x-cg-pro-api-key": process.env.COINGECKO_API_KEY || "",
         },
       }
     );
@@ -55,20 +69,10 @@ export async function GET(request: Request) {
       return NextResponse.json(error, { status: response.status });
     }
 
-    const data = (await response.json()).data.attributes.ohlcv_list;
-    console.log("data", data);
-
-    // Filter data between from and to timestamps
-    const fromTimestamp = parseInt(from);
-    const toTimestamp = parseInt(to);
-
-    const filteredData = data.filter((item: number[]) => {
-      const timestamp = item[0];
-      return timestamp >= fromTimestamp && timestamp < toTimestamp;
-    });
+    const data = (await response.json()).data;
 
     let status = "ok";
-    if (filteredData.length === 0) {
+    if (data.length === 0) {
       status = "no_data";
     }
 
@@ -78,8 +82,8 @@ export async function GET(request: Request) {
     const l = [];
     const c = [];
 
-    for (const _data of filteredData) {
-      t.push(_data[0]);
+    for (const _data of data) {
+      t.push(_data[0] * 1000);
       o.push(_data[1]);
       h.push(_data[2]);
       l.push(_data[3]);

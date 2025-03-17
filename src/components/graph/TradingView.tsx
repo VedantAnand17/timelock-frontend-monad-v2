@@ -28,7 +28,7 @@ export const TradingView = memo(
             expectedOrder: "latestLast",
           }
         ),
-        interval: "1D" as ResolutionString,
+        interval: "1" as ResolutionString,
         container: chartContainerRef.current,
         library_path: props.library_path,
         locale: props.locale as LanguageCode,

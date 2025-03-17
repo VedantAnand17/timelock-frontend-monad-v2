@@ -18,7 +18,7 @@ export default function Graph() {
 
   const defaultWidgetProps: Partial<ChartingLibraryWidgetOptions> = {
     symbol: "WETH",
-    interval: "1D" as ResolutionString,
+    interval: "1" as ResolutionString,
     library_path: "/static/charting_library/",
     locale: "en",
     charts_storage_api_version: "1.1",
