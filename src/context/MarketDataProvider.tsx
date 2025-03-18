@@ -13,6 +13,7 @@ import { IVDataPoint } from "@/lib/api";
 interface MarketData {
   ttlIV: IVDataPoint[];
   optionMarketAddress: string;
+  primePool: string;
   selectedDurationIndex: number;
   setSelectedDurationIndex: Dispatch<SetStateAction<number>>;
 }
@@ -21,6 +22,7 @@ interface MarketDataProviderProps {
   children: ReactNode;
   ttlIV: MarketData["ttlIV"];
   optionMarketAddress: MarketData["optionMarketAddress"];
+  primePool: MarketData["primePool"];
 }
 
 const MarketDataContext = createContext<MarketData | null>(null);
@@ -29,6 +31,7 @@ export function MarketDataProvider({
   children,
   ttlIV,
   optionMarketAddress,
+  primePool,
 }: MarketDataProviderProps) {
   const [selectedDurationIndex, setSelectedDurationIndex] = useState(1);
   return (
@@ -36,6 +39,7 @@ export function MarketDataProvider({
       value={{
         ttlIV,
         optionMarketAddress,
+        primePool,
         selectedDurationIndex,
         setSelectedDurationIndex,
       }}

@@ -15,6 +15,7 @@ export default async function Home() {
     <MarketDataProvider
       ttlIV={ttlIV}
       optionMarketAddress={market.market.address}
+      primePool={market.market.primePool}
     >
       <main>
         <Navbar />

@@ -7,11 +7,12 @@ import { cn } from "@/lib/utils";
 import { useForm, useStore } from "@tanstack/react-form";
 import { useMarketData } from "@/context/MarketDataProvider";
 import { LIQUIDITY_HANDLER_ADDRESS_USDC } from "@/lib/contracts";
-import { useReadContract } from "wagmi";
+import { useAccount, useReadContract, useWriteContract } from "wagmi";
 import { TRADE_PREVIEW_ADDRESS } from "@/lib/contracts";
 import { TRADE_PREVIEW_ABI } from "@/lib/abis/tradePreviewAbi";
-import { formatUnits, parseUnits } from "viem";
+import { formatUnits, parseUnits, erc20Abi } from "viem";
 import { Big } from "big.js";
+import { TRADE_EXECUTE_ABI } from "@/lib/abis/tradeExecuteAbi";
 
 interface TradePreviewStep {
   amount: bigint;
@@ -30,20 +31,20 @@ interface TradePreviewResult {
 }
 
 export default function TradingForm({ isLong }: { isLong: boolean }) {
+  const { isPending, writeContract } = useWriteContract();
   const { selectedTokenPair } = useSelectedTokenPair();
+  const { address } = useAccount();
   const {
     ttlIV,
     selectedDurationIndex,
     setSelectedDurationIndex,
     optionMarketAddress,
+    primePool,
   } = useMarketData();
 
   const form = useForm({
     defaultValues: {
       amount: "",
-    },
-    onSubmit: async (values) => {
-      console.log(values.value.amount, durations[selectedDurationIndex]);
     },
   });
 
@@ -80,12 +81,71 @@ export default function TradingForm({ isLong }: { isLong: boolean }) {
 
   const durations = ttlIV.map((item) => formatDuration(item.ttl));
 
+  const { writeContract: writeApproval } = useWriteContract();
+
+  const { data: allowance } = useReadContract({
+    address: selectedTokenPair[1].address as `0x${string}`,
+    abi: erc20Abi,
+    functionName: "allowance",
+    args: [address as `0x${string}`, optionMarketAddress as `0x${string}`],
+  });
+
+  const executeTrade = async () => {
+    if (!amount || Big(amount).eq(0)) return;
+    if (
+      !tradeData ||
+      !tradeData.steps ||
+      tradeData.steps.length === 0 ||
+      allowance === undefined
+    )
+      return;
+
+    try {
+      if (Big(allowance.toString()).lt(totalCost.toString())) {
+        await writeApproval({
+          address: selectedTokenPair[1].address as `0x${string}`,
+          abi: erc20Abi,
+          functionName: "approve",
+          args: [optionMarketAddress as `0x${string}`, totalCost as bigint],
+        });
+      }
+
+      const optionTicks = {
+        _handler: LIQUIDITY_HANDLER_ADDRESS_USDC,
+        pool: primePool,
+        hook: "0x0000000000000000000000000000000000000000",
+        tickLower: tradeData.steps[0].tickLower,
+        tickUpper: tradeData.steps[0].tickUpper,
+        liquidityToUse: tradeData.steps[0].liquidity,
+      };
+
+      writeContract({
+        address: optionMarketAddress as `0x${string}`,
+        abi: TRADE_EXECUTE_ABI,
+        functionName: "mintOption",
+        args: [
+          {
+            optionTicks: [optionTicks],
+            tickLower: tradeData.steps[0].tickLower,
+            tickUpper: tradeData.steps[0].tickUpper,
+            ttl: ttlIV[selectedDurationIndex].ttl,
+            isCall: isLong,
+            maxCostAllowance: tradeData.totalCost,
+          },
+        ],
+      });
+    } catch (error) {
+      console.error("Transaction failed:", error);
+    }
+  };
+
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault();
         e.stopPropagation();
         form.handleSubmit();
+        executeTrade();
       }}
       className="relative"
     >
@@ -146,7 +206,9 @@ export default function TradingForm({ isLong }: { isLong: boolean }) {
                 "w-full disabled:opacity-50 cursor-pointer bg-[#19DE92] text-[#0D0D0D] font-medium text-base rounded-[12px] py-3",
                 isLong ? "bg-[#19DE92]" : "bg-[#EC5058]"
               )}
-              disabled={!canSubmit || isSubmitting || isLoading || isError}
+              disabled={
+                !canSubmit || isSubmitting || isLoading || isError || isPending
+              }
             >
               {isLong
                 ? "Long " + selectedTokenPair[0].symbol

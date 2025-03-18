@@ -9,6 +9,7 @@ interface MarketResponse {
   market: {
     ttlIV: IVDataPoint[];
     address: string;
+    primePool: string;
   };
 }
 
