@@ -1,18 +1,23 @@
 "use client";
 
-import React from "react";
+import { usePositionsTableData } from "@/hooks/usePositionsTableData";
 import {
   flexRender,
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import columns, { Position } from "./Columns";
-
-const dummyData: Position[] = [];
+import { useMemo } from "react";
+import columns from "./Columns";
 
 export default function Tables() {
+  const { data: positions } = usePositionsTableData();
+  const positionsData = positions?.positions;
+
   const table = useReactTable({
-    data: dummyData,
+    data: useMemo(() => {
+      if (!positionsData) return [];
+      return positionsData;
+    }, [positionsData]),
     columns,
     getCoreRowModel: getCoreRowModel(),
   });

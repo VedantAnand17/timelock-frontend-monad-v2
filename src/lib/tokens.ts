@@ -26,7 +26,7 @@ export const USDC: Token = {
   id: "1",
   symbol: "USDC",
   name: "Circle USD",
-  address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+  address: "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
   image: "/tokens/usdc.png",
   decimals: 6,
   displayDecimals: 2,

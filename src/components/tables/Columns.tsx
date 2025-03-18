@@ -2,25 +2,16 @@ import { createColumnHelper } from "@tanstack/react-table";
 import { LongIcon } from "@/icons";
 import { ShortIcon } from "@/icons";
 import Image from "next/image";
-import { Token } from "@/lib/tokens";
 import { cn } from "@/lib/utils";
-
-export type Position = {
-  id: string;
-  isLong: boolean;
-  token: Token;
-  size: string;
-  currentPrice: string;
-  pnlValue: string;
-  pnlPercentage: string;
-  paidPrice: string;
-  expiryTime: string;
-};
+import { Position } from "@/hooks/usePositionsTableData";
+import { allTokens } from "@/lib/tokens";
+import { formatUnits } from "viem";
+import Big from "big.js";
 
 const columnHelper = createColumnHelper<Position>();
 
 const columns = [
-  columnHelper.accessor("isLong", {
+  columnHelper.accessor("isCall", {
     header: "Position",
     cell: (info) => (
       <div className="pl-6 py-2">
@@ -34,13 +25,25 @@ const columns = [
           <div className="flex flex-col gap-[2px]">
             <div className="flex flex-row gap-1 items-center">
               <Image
-                src={info.row.original.token.image}
-                alt={info.row.original.token.symbol}
+                src={
+                  allTokens[
+                    info.row.original.callAsset.toLowerCase() as `0x${string}`
+                  ].image
+                }
+                alt={
+                  allTokens[
+                    info.row.original.callAsset.toLowerCase() as `0x${string}`
+                  ].symbol
+                }
                 width={12}
                 height={12}
               />
               <span className="text-sm text-white">
-                {info.row.original.token.symbol}
+                {
+                  allTokens[
+                    info.row.original.callAsset.toLowerCase() as `0x${string}`
+                  ].symbol
+                }
               </span>
             </div>
             <span
@@ -55,43 +58,96 @@ const columns = [
       </div>
     ),
   }),
-  columnHelper.accessor("size", {
+  columnHelper.accessor("amount", {
     header: "Size",
-  }),
-  columnHelper.accessor("currentPrice", {
-    header: "Current Price",
-  }),
-  columnHelper.accessor("pnlValue", {
-    header: "PnL",
-    cell: (info) => (
-      <div className="flex flex-row items-center gap-1 text-[13px]">
-        <span className="text-[#19DE92]">{info.getValue()}</span>
-        <span className="text-[#19DE92]">
-          ({info.row.original.pnlPercentage})
+    cell: (info) => {
+      const token =
+        allTokens[info.row.original.callAsset.toLowerCase() as `0x${string}`];
+      const amount = info.getValue()
+        ? formatUnits(BigInt(info.getValue()), token.decimals)
+        : "";
+
+      return (
+        <span className="text-sm text-white font-semibold">
+          {Big(amount).toFixed(token.displayDecimals)} {token.symbol}
         </span>
-      </div>
-    ),
+      );
+    },
   }),
-  columnHelper.accessor("paidPrice", {
-    header: "You Paid",
+  columnHelper.display({
+    id: "currentPrice",
+    header: "Current Price",
+    cell: () => <span className="text-sm text-white font-semibold">--</span>,
   }),
-  columnHelper.accessor("expiryTime", {
-    header: "Expiry",
-    cell: (info) => (
-      <div className="text-[11px] text-white/[0.5] flex flex-col gap-1">
-        <span>{info.getValue()}</span>
-        <div className="w-[130px] h-[10px] bg-[#1A1A1A] rounded-md relative">
-          <div
+  columnHelper.accessor("value", {
+    header: "PnL",
+    cell: (info) => {
+      const value = info.getValue();
+      const decimals =
+        allTokens[info.row.original.putAsset.toLowerCase() as `0x${string}`]
+          .decimals;
+      return (
+        <div className="flex flex-row items-center gap-1 text-[13px]">
+          <span
             className={cn(
-              "absolute top-0 left-0 h-full  rounded-md",
-              info.row.original.isLong
-                ? "w-[60%] bg-[#EC5058]"
-                : "w-[40%] bg-[#19DE92]"
+              "text-[#19DE92]",
+              Big(value).lt(0) ? "text-[#EC5058]" : "text-[#19DE92]"
             )}
-          ></div>
+          >
+            {value ? formatUnits(BigInt(value), decimals) : "--"}
+          </span>
         </div>
-      </div>
-    ),
+      );
+    },
+  }),
+  columnHelper.accessor("paid", {
+    header: "You Paid",
+    cell: (info) => {
+      const value = info.getValue();
+      const decimals =
+        allTokens[info.row.original.putAsset.toLowerCase() as `0x${string}`]
+          .decimals;
+      const symbol =
+        allTokens[info.row.original.putAsset.toLowerCase() as `0x${string}`]
+          .symbol;
+      return (
+        <span className="text-sm text-white font-semibold">
+          {value ? formatUnits(BigInt(value), decimals) : "--"} {symbol}
+        </span>
+      );
+    },
+  }),
+  columnHelper.accessor("expiry", {
+    header: "Expiry",
+    cell: (info) => {
+      const expiry = info.getValue();
+      const createdAt = info.row.original.createdAt;
+      const totalDuration = expiry - createdAt;
+      const remaining = expiry - Math.floor(Date.now() / 1000);
+      const progressPercentage = Math.max(
+        0,
+        Math.min(100, (remaining / totalDuration) * 100)
+      );
+
+      const hoursRemaining = Math.floor(remaining / 3600);
+      const minutesRemaining = Math.floor((remaining % 3600) / 60);
+
+      return (
+        <div className="text-[11px] text-white/[0.5] flex flex-col gap-1">
+          <span>{`${hoursRemaining}h ${minutesRemaining}m`}</span>
+          <div className="w-[130px] h-[10px] bg-[#1A1A1A] rounded-md relative">
+            <div
+              className={cn(
+                "absolute top-0 left-0 h-full rounded-md",
+                remaining <= 0
+                  ? "w-0 bg-[#EC5058]"
+                  : `w-[${progressPercentage}%] bg-[#19DE92]`
+              )}
+            ></div>
+          </div>
+        </div>
+      );
+    },
   }),
   columnHelper.display({
     id: "actions",
