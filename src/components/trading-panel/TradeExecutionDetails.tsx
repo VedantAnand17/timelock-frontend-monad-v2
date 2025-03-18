@@ -5,8 +5,16 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
+import { useSelectedTokenPair } from "@/providers/SelectedTokenPairProvider";
+import { formatUnits } from "viem";
 
-export default function TradeExecutionDetails() {
+export default function TradeExecutionDetails({
+  premiumCost,
+  protocolFee,
+}: {
+  premiumCost: bigint;
+  protocolFee: bigint;
+}) {
   return (
     <Accordion type="single" collapsible className="min-h-[193px]">
       <AccordionItem value="item-1">
@@ -16,17 +24,12 @@ export default function TradeExecutionDetails() {
         <AccordionContent className="px-4">
           <TradeExecutionDetailsItem
             title="Premium"
-            value="10 USDC"
+            value={premiumCost}
             className="pt-3 pb-[10px]"
           />
           <TradeExecutionDetailsItem
             title="Protocol Fees"
-            value="1 USDC"
-            className="pb-[10px]"
-          />
-          <TradeExecutionDetailsItem
-            title="Reserve Fees"
-            value="0.5 USDC"
+            value={protocolFee}
             className="pb-[10px]"
           />
           <div className="w-full mt-5 h-[1px] bg-[#282324]"></div>
@@ -42,9 +45,11 @@ const TradeExecutionDetailsItem = ({
   className,
 }: {
   title: string;
-  value: string;
+  value: bigint;
   className?: string;
 }) => {
+  const { selectedTokenPair } = useSelectedTokenPair();
+
   return (
     <div
       className={cn(
@@ -53,7 +58,9 @@ const TradeExecutionDetailsItem = ({
       )}
     >
       <span className="text-[#9CA3AF] text-sm">{title}</span>
-      <span className="text-white text-sm font-medium">{value}</span>
+      <span className="text-white text-sm font-medium">
+        {value ? formatUnits(value, selectedTokenPair[1].decimals) : "--"}
+      </span>
     </div>
   );
 };

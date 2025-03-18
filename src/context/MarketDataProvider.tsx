@@ -12,6 +12,7 @@ import { IVDataPoint } from "@/lib/api";
 
 interface MarketData {
   ttlIV: IVDataPoint[];
+  optionMarketAddress: string;
   selectedDurationIndex: number;
   setSelectedDurationIndex: Dispatch<SetStateAction<number>>;
 }
@@ -19,6 +20,7 @@ interface MarketData {
 interface MarketDataProviderProps {
   children: ReactNode;
   ttlIV: MarketData["ttlIV"];
+  optionMarketAddress: MarketData["optionMarketAddress"];
 }
 
 const MarketDataContext = createContext<MarketData | null>(null);
@@ -26,11 +28,17 @@ const MarketDataContext = createContext<MarketData | null>(null);
 export function MarketDataProvider({
   children,
   ttlIV,
+  optionMarketAddress,
 }: MarketDataProviderProps) {
   const [selectedDurationIndex, setSelectedDurationIndex] = useState(1);
   return (
     <MarketDataContext.Provider
-      value={{ ttlIV, selectedDurationIndex, setSelectedDurationIndex }}
+      value={{
+        ttlIV,
+        optionMarketAddress,
+        selectedDurationIndex,
+        setSelectedDurationIndex,
+      }}
     >
       {children}
     </MarketDataContext.Provider>

@@ -8,6 +8,7 @@ export interface IVDataPoint {
 interface MarketResponse {
   market: {
     ttlIV: IVDataPoint[];
+    address: string;
   };
 }
 

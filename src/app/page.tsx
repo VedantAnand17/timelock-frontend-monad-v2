@@ -12,7 +12,10 @@ export default async function Home() {
   const ttlIV = market.market.ttlIV;
 
   return (
-    <MarketDataProvider ttlIV={ttlIV}>
+    <MarketDataProvider
+      ttlIV={ttlIV}
+      optionMarketAddress={market.market.address}
+    >
       <main>
         <Navbar />
         <div className=" max-w-[1440px] flex flex-row gap-6 mx-auto border-t border-t-[#1A1A1A]">
