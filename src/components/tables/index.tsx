@@ -6,44 +6,9 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { BTC, ETH, SOL } from "@/lib/tokens";
 import columns, { Position } from "./Columns";
 
-const dummyData: Position[] = [
-  {
-    id: "1",
-    isLong: true,
-    token: ETH,
-    size: "1 ETH",
-    currentPrice: "2500 USDC",
-    pnlValue: "+273 USDC",
-    pnlPercentage: "16.6%",
-    paidPrice: "11.5 USDC",
-    expiryTime: "5h 59m 6s",
-  },
-  {
-    id: "2",
-    isLong: false,
-    token: BTC,
-    size: "0.05 BTC",
-    currentPrice: "42000 USDC",
-    pnlValue: "-120 USDC",
-    pnlPercentage: "8.2%",
-    paidPrice: "43.2 USDC",
-    expiryTime: "2h 30m 15s",
-  },
-  {
-    id: "3",
-    isLong: true,
-    token: SOL,
-    size: "10 SOL",
-    currentPrice: "150 USDC",
-    pnlValue: "+45 USDC",
-    pnlPercentage: "3.1%",
-    paidPrice: "14.7 USDC",
-    expiryTime: "12h 45m 30s",
-  },
-];
+const dummyData: Position[] = [];
 
 export default function Tables() {
   const table = useReactTable({
@@ -79,7 +44,7 @@ export default function Tables() {
                       ? null
                       : flexRender(
                           header.column.columnDef.header,
-                          header.getContext(),
+                          header.getContext()
                         )}
                   </th>
                 ))}

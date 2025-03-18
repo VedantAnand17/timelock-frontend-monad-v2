@@ -4,9 +4,12 @@ import { ChevronDown } from "@/icons";
 import { useSelectedTokenPair } from "@/providers/SelectedTokenPairProvider";
 import Image from "next/image";
 import LineChart from "./LineChart";
+import { useMarketData } from "@/context/MarketDataProvider";
 
 export default function SelectedTokenPairDetails() {
   const { selectedTokenPair } = useSelectedTokenPair();
+  const { ttlIV, selectedDurationIndex } = useMarketData();
+  const selectedDurationIv = ttlIV[selectedDurationIndex].IV;
 
   return (
     <div className="flex flex-row justify-between">
@@ -36,7 +39,7 @@ export default function SelectedTokenPairDetails() {
         <div className="px-4 py-3 bg-[#0d0d0d] flex flex-row items-center gap-5 h-fit rounded-xl">
           <span className="text-[#616E85] text-xs font-medium">IV</span>
           <div className="flex flex-row items-center justify-between gap-1">
-            <span className="">60</span>
+            <span className="">{selectedDurationIv}</span>
             <div className="w-[200px] h-[38px]">
               <LineChart />
             </div>

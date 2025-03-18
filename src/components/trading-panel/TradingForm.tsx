@@ -5,12 +5,20 @@ import DurationSelector from "./DurationSelector";
 import TradeExecutionDetails from "./TradeExecutionDetails";
 import { cn } from "@/lib/utils";
 import { useForm } from "@tanstack/react-form";
-import { useState } from "react";
+import { useMarketData } from "@/context/MarketDataProvider";
 
 export default function TradingForm({ isLong }: { isLong: boolean }) {
   const { selectedTokenPair } = useSelectedTokenPair();
-  const durations = ["5m", "15m", "1H", "4H", "1D", "3D"];
-  const [selectedDurationIndex, setSelectedDurationIndex] = useState(1);
+  const { ttlIV, selectedDurationIndex, setSelectedDurationIndex } =
+    useMarketData();
+
+  const formatDuration = (ttl: number) => {
+    if (ttl < 3600) return `${Math.floor(ttl / 60)}m`;
+    if (ttl < 86400) return `${Math.floor(ttl / 3600)}H`;
+    return `${Math.floor(ttl / 86400)}D`;
+  };
+
+  const durations = ttlIV.map((item) => formatDuration(item.ttl));
 
   const form = useForm({
     defaultValues: {
