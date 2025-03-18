@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 
-const NETWORK_ID = "base";
 const POOL_ADDRESS = "0xd0b53D9277642d899DF5C87A3966A349A798F224";
 const TIMEFRAME_MAP = {
   1: "1m",
@@ -23,8 +22,6 @@ export async function GET(request: Request) {
     const resolution = searchParams.get("resolution");
     const symbol = searchParams.get("symbol");
 
-    const networkId = NETWORK_ID;
-    const poolAddress = POOL_ADDRESS;
     const timeframe = TIMEFRAME_MAP[resolution as keyof typeof TIMEFRAME_MAP];
 
     if (!resolution || !symbol) {
@@ -33,11 +30,10 @@ export async function GET(request: Request) {
       });
     }
 
-    if (!networkId || !poolAddress || !timeframe) {
+    if (!timeframe) {
       return NextResponse.json(
         {
-          error:
-            "Missing required parameters: networkId, poolAddress, timeframe",
+          error: "Missing required parameters: timeframe",
         },
         { status: 400 }
       );
@@ -51,18 +47,8 @@ export async function GET(request: Request) {
       );
     }
 
-    // const response = await fetch(
-    //   `https://pro-api.coingecko.com/api/v3/onchain/networks/${networkId}/pools/${poolAddress}/ohlcv/${timeframe}?token=quote&before_timestamp=${to}&limit=${limit}`,
-    //   {
-    //     headers: {
-    //       accept: "application/json",
-    //       "x-cg-pro-api-key": process.env.COINGECKO_API_KEY || "",
-    //     },
-    //   }
-    // );
-
     const response = await fetch(
-      `${process.env.OHLC_BACKEND}/ohlc/${poolAddress}?from=${from}&to=${to}&interval=${timeframe}`,
+      `${process.env.OHLC_BACKEND}/ohlc/${POOL_ADDRESS}?from=${from}&to=${to}&interval=${timeframe}`,
       {
         headers: {
           accept: "application/json",
@@ -87,6 +73,7 @@ export async function GET(request: Request) {
     const h = [];
     const l = [];
     const c = [];
+    const v = [];
 
     for (const _data of data) {
       t.push(_data[0]);
@@ -94,6 +81,7 @@ export async function GET(request: Request) {
       h.push(_data[2]);
       l.push(_data[3]);
       c.push(_data[4]);
+      v.push(_data[5]);
     }
 
     const barsRes = {
@@ -102,6 +90,7 @@ export async function GET(request: Request) {
       h: h,
       l: l,
       c: c,
+      v: v,
       s: status,
     };
 
