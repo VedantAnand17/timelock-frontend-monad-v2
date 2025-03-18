@@ -4,6 +4,8 @@ const NETWORK_ID = "base";
 const POOL_ADDRESS = "0xd0b53D9277642d899DF5C87A3966A349A798F224";
 const TIMEFRAME_MAP = {
   1: "1m",
+  5: "1m",
+  15: "1m",
   60: "1h",
   "1D": "1d",
 };

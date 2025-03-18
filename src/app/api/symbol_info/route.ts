@@ -8,7 +8,7 @@ export async function GET() {
     minmovement2: 0,
     pricescale: [1000],
     "has-dwm": true,
-    "has-intraday": false,
+    "has-intraday": true,
     type: ["stock"],
     ticker: ["WETH"],
     timezone: "America/New_York",

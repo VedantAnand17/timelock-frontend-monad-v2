@@ -15,20 +15,20 @@ export const TradingView = memo(
     useEffect(() => {
       if (!window || !chartContainerRef.current) return;
       const widgetOptions: ChartingLibraryWidgetOptions = {
-        symbol: "AAPL",
+        symbol: "WETH",
         // symbol: props.symbol,
         // BEWARE: no trailing slash is expected in feed URL
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         datafeed: new (window as any).Datafeeds.UDFCompatibleDatafeed(
-          "https://demo-feed-data.tradingview.com",
-          // "/api",
+          //   "https://demo-feed-data.tradingview.com",
+          "/api",
           undefined,
           {
             // maxResponseLength: 1000,
             expectedOrder: "latestLast",
           }
         ),
-        interval: "1D" as ResolutionString,
+        interval: "15" as ResolutionString,
         container: chartContainerRef.current,
         library_path: props.library_path,
         locale: props.locale as LanguageCode,
@@ -57,7 +57,7 @@ export const TradingView = memo(
         theme: "dark",
         custom_css_url: "./theme.css",
         custom_font_family: "Giest",
-        debug: true,
+        debug: false,
         time_scale: {
           min_bar_spacing: 30,
         },
