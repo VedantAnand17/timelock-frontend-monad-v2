@@ -15,20 +15,20 @@ export const TradingView = memo(
     useEffect(() => {
       if (!window || !chartContainerRef.current) return;
       const widgetOptions: ChartingLibraryWidgetOptions = {
-        symbol: "WETH",
+        symbol: "AAPL",
         // symbol: props.symbol,
         // BEWARE: no trailing slash is expected in feed URL
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         datafeed: new (window as any).Datafeeds.UDFCompatibleDatafeed(
-          //   "https://demo-feed-data.tradingview.com",
-          "/api",
+          "https://demo-feed-data.tradingview.com",
+          // "/api",
           undefined,
           {
             // maxResponseLength: 1000,
             expectedOrder: "latestLast",
           }
         ),
-        interval: "1" as ResolutionString,
+        interval: "1D" as ResolutionString,
         container: chartContainerRef.current,
         library_path: props.library_path,
         locale: props.locale as LanguageCode,
@@ -120,26 +120,7 @@ export const TradingView = memo(
         "paneProperties.backgroundType": "solid",
       });
 
-      tvWidget.onChartReady(() => {
-        tvWidget.headerReady().then(() => {
-          // const button = tvWidget.createButton();
-          // tvWidget.chart().onHoveredSourceChanged().subscribe(null, (e) => {
-          //   console.log(e, "ee")
-          // })
-          // button.setAttribute('title', 'Click to show a notification popup');
-          // button.classList.add('apply-common-tooltip');
-          // button.addEventListener('click', () =>
-          //   tvWidget.showNoticeDialog({
-          //     title: 'Notification',
-          //     body: 'TradingView Charting Library API works correctly',
-          //     callback: () => {
-          //       console.info('Noticed!');
-          //     },
-          //   })
-          // );
-          // button.innerHTML = 'Check API';
-        });
-      });
+      tvWidget.onChartReady(() => {});
 
       return () => {
         tvWidget.remove();

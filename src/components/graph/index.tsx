@@ -4,7 +4,6 @@
 import React, { useState } from "react";
 import { TradingView } from "./TradingView";
 import Script from "next/script";
-import { ResolutionString } from "../../../public/static/charting_library/charting_library";
 import { ChartingLibraryWidgetOptions } from "../../../public/static/charting_library/charting_library";
 
 export default function Graph() {
@@ -18,7 +17,6 @@ export default function Graph() {
 
   const defaultWidgetProps: Partial<ChartingLibraryWidgetOptions> = {
     symbol: "WETH",
-    interval: "1" as ResolutionString,
     library_path: "/static/charting_library/",
     locale: "en",
     charts_storage_api_version: "1.1",

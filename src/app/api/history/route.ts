@@ -2,7 +2,11 @@ import { NextResponse } from "next/server";
 
 const NETWORK_ID = "base";
 const POOL_ADDRESS = "0xd0b53D9277642d899DF5C87A3966A349A798F224";
-const TIMEFRAME = "minute";
+const TIMEFRAME_MAP = {
+  1: "1m",
+  60: "1h",
+  "1D": "1d",
+};
 
 export async function GET(request: Request) {
   try {
@@ -19,7 +23,7 @@ export async function GET(request: Request) {
 
     const networkId = NETWORK_ID;
     const poolAddress = POOL_ADDRESS;
-    const timeframe = TIMEFRAME;
+    const timeframe = TIMEFRAME_MAP[resolution as keyof typeof TIMEFRAME_MAP];
 
     if (!resolution || !symbol) {
       return new Response(`Pass resolution and symbol`, {
@@ -37,7 +41,7 @@ export async function GET(request: Request) {
       );
     }
 
-    const validTimeframes = ["day", "hour", "minute"];
+    const validTimeframes = ["1m", "1h", "1d"];
     if (!validTimeframes.includes(timeframe)) {
       return NextResponse.json(
         { error: "Invalid timeframe. Must be one of: day, hour, minute" },
@@ -83,7 +87,7 @@ export async function GET(request: Request) {
     const c = [];
 
     for (const _data of data) {
-      t.push(_data[0] * 1000);
+      t.push(_data[0]);
       o.push(_data[1]);
       h.push(_data[2]);
       l.push(_data[3]);
@@ -91,7 +95,7 @@ export async function GET(request: Request) {
     }
 
     const barsRes = {
-      t: t.reverse(),
+      t: t,
       o: o,
       h: h,
       l: l,
@@ -101,9 +105,9 @@ export async function GET(request: Request) {
 
     return NextResponse.json(barsRes);
   } catch (error) {
-    console.error("Error fetching CoinGecko data:", error);
+    console.error("Error fetching data:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: error || "Internal server error" },
       { status: 500 }
     );
   }
