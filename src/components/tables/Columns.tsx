@@ -7,6 +7,9 @@ import { Position } from "@/hooks/usePositionsTableData";
 import { allTokens } from "@/lib/tokens";
 import { formatUnits } from "viem";
 import Big from "big.js";
+import { useMarketData } from "@/context/MarketDataProvider";
+import { formatTokenDisplayCondensed } from "@/lib/format";
+import { useSelectedTokenPair } from "@/providers/SelectedTokenPairProvider";
 
 const columnHelper = createColumnHelper<Position>();
 
@@ -69,7 +72,7 @@ const columns = [
 
       return (
         <span className="text-sm text-white font-semibold">
-          {Big(amount).toFixed(token.displayDecimals)} {token.symbol}
+          {formatTokenDisplayCondensed(amount, token.decimals)} {token.symbol}
         </span>
       );
     },
@@ -77,7 +80,7 @@ const columns = [
   columnHelper.display({
     id: "currentPrice",
     header: "Current Price",
-    cell: () => <span className="text-sm text-white font-semibold">--</span>,
+    cell: () => <CurrentPriceCell />,
   }),
   columnHelper.accessor("value", {
     header: "PnL",
@@ -94,7 +97,12 @@ const columns = [
               Big(value).lt(0) ? "text-[#EC5058]" : "text-[#19DE92]"
             )}
           >
-            {value ? formatUnits(BigInt(value), decimals) : "--"}
+            {value
+              ? formatTokenDisplayCondensed(
+                  formatUnits(BigInt(value), decimals),
+                  decimals
+                )
+              : "--"}
           </span>
         </div>
       );
@@ -112,7 +120,13 @@ const columns = [
           .symbol;
       return (
         <span className="text-sm text-white font-semibold">
-          {value ? formatUnits(BigInt(value), decimals) : "--"} {symbol}
+          {value
+            ? formatTokenDisplayCondensed(
+                formatUnits(BigInt(value), decimals),
+                decimals
+              )
+            : "--"}{" "}
+          {symbol}
         </span>
       );
     },
@@ -124,9 +138,10 @@ const columns = [
       const createdAt = info.row.original.createdAt;
       const totalDuration = expiry - createdAt;
       const remaining = expiry - Math.floor(Date.now() / 1000);
-      const progressPercentage = Math.max(
+
+      const elapsedPercentage = Math.max(
         0,
-        Math.min(100, (remaining / totalDuration) * 100)
+        Math.min(100, 100 - (remaining / totalDuration) * 100)
       );
 
       const hoursRemaining = Math.floor(remaining / 3600);
@@ -137,12 +152,10 @@ const columns = [
           <span>{`${hoursRemaining}h ${minutesRemaining}m`}</span>
           <div className="w-[130px] h-[10px] bg-[#1A1A1A] rounded-md relative">
             <div
-              className={cn(
-                "absolute top-0 left-0 h-full rounded-md",
-                remaining <= 0
-                  ? "w-0 bg-[#EC5058]"
-                  : `w-[${progressPercentage}%] bg-[#19DE92]`
-              )}
+              className={`absolute top-0 left-0 h-full rounded-md ${
+                remaining <= 0 ? "bg-[#EC5058]" : "bg-[#19DE92]"
+              }`}
+              style={{ width: `${elapsedPercentage}%` }}
             ></div>
           </div>
         </div>
@@ -159,4 +172,19 @@ const columns = [
   }),
 ];
 
+const CurrentPriceCell = () => {
+  const { primePoolPriceData } = useMarketData();
+  const { selectedTokenPair } = useSelectedTokenPair();
+
+  return (
+    <span className="text-sm text-white font-semibold">
+      {primePoolPriceData?.currentPrice
+        ? formatTokenDisplayCondensed(
+            Big(primePoolPriceData?.currentPrice).toString(),
+            selectedTokenPair[1].decimals
+          )
+        : "--"}
+    </span>
+  );
+};
 export default columns;

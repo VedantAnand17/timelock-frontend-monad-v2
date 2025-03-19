@@ -5,10 +5,12 @@ import { useSelectedTokenPair } from "@/providers/SelectedTokenPairProvider";
 import Image from "next/image";
 import LineChart from "./LineChart";
 import { useMarketData } from "@/context/MarketDataProvider";
+import { formatTokenDisplayCondensed } from "@/lib/format";
+import Big from "big.js";
 
 export default function SelectedTokenPairDetails() {
   const { selectedTokenPair } = useSelectedTokenPair();
-  const { ttlIV, selectedDurationIndex } = useMarketData();
+  const { ttlIV, selectedDurationIndex, primePoolPriceData } = useMarketData();
   const selectedDurationIv = ttlIV[selectedDurationIndex].IV;
 
   return (
@@ -26,7 +28,15 @@ export default function SelectedTokenPairDetails() {
           </span>
         </div>
         <div className="flex flex-row items-center mt-3 gap-3">
-          <span className="text-white text-[30px] font-medium">$2,735.56</span>
+          <span className="text-white text-[30px] font-medium">
+            {"$"}
+            {primePoolPriceData?.currentPrice
+              ? formatTokenDisplayCondensed(
+                  Big(primePoolPriceData?.currentPrice).toString(),
+                  selectedTokenPair[1].decimals
+                )
+              : "--"}
+          </span>
           <div className="px-3 py-[8px] bg-[#1A1A1A] rounded-[6px]">
             {selectedTokenPair[1].symbol}
           </div>
