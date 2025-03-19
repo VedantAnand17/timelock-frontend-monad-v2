@@ -4,18 +4,25 @@ import SelectedTokenPairDetails from "@/components/SelectedTokenPairDetails";
 import Tables from "@/components/tables";
 import TradingPanel from "@/components/trading-panel/TradingPanel";
 import Graph from "@/components/graph";
-import { getMarketIvData } from "@/lib/api";
+import { getMarketIvData, getPriceData } from "@/lib/api";
 import { MarketDataProvider } from "@/context/MarketDataProvider";
 
 export default async function Home() {
-  const market = await getMarketIvData();
+  const [market, priceData] = await Promise.all([
+    getMarketIvData(),
+    getPriceData(),
+  ]);
   const ttlIV = market.market.ttlIV;
+  const primePoolPriceData = priceData.find(
+    (price) => price.poolAddress === market.market.primePool
+  );
 
   return (
     <MarketDataProvider
       ttlIV={ttlIV}
       optionMarketAddress={market.market.address}
       primePool={market.market.primePool}
+      primePoolPriceData={primePoolPriceData}
     >
       <main>
         <Navbar />

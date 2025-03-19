@@ -7,6 +7,7 @@ import { ArrowDownIcon } from "@/icons";
 import { useAccount, useBalance } from "wagmi";
 import { USDC } from "@/lib/tokens";
 import { useSelectedTokenPair } from "@/providers/SelectedTokenPairProvider";
+import { formatTokenDisplayCondensed } from "@/lib/format";
 
 const ConnectButton = () => {
   const { selectedTokenPair } = useSelectedTokenPair();
@@ -27,9 +28,14 @@ const ConnectButton = () => {
           {isLoading ? (
             <div className="h-4 w-16 animate-pulse rounded bg-gray-700" />
           ) : (
-            `${balanceData ? balanceData.value.toString() : "--"} ${
-              selectedTokenPair[1].symbol
-            }`
+            `${
+              balanceData
+                ? formatTokenDisplayCondensed(
+                    balanceData.formatted,
+                    selectedTokenPair[1].decimals
+                  )
+                : "--"
+            } ${selectedTokenPair[1].symbol}`
           )}
         </div>
       )}

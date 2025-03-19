@@ -13,6 +13,7 @@ import { TRADE_PREVIEW_ABI } from "@/lib/abis/tradePreviewAbi";
 import { formatUnits, parseUnits, erc20Abi } from "viem";
 import { Big } from "big.js";
 import { TRADE_EXECUTE_ABI } from "@/lib/abis/tradeExecuteAbi";
+import { formatTokenDisplayCondensed } from "@/lib/format";
 
 interface TradePreviewStep {
   amount: bigint;
@@ -40,6 +41,7 @@ export default function TradingForm({ isLong }: { isLong: boolean }) {
     setSelectedDurationIndex,
     optionMarketAddress,
     primePool,
+    primePoolPriceData,
   } = useMarketData();
 
   const form = useForm({
@@ -72,6 +74,32 @@ export default function TradingForm({ isLong }: { isLong: boolean }) {
   const premiumCost = tradeData?.premiumCost;
   const totalCost = tradeData?.totalCost;
   const protocolFee = tradeData?.protocolFee;
+
+  const calculateLeverage = () => {
+    if (!tradeData?.steps || !totalCost || !primePoolPriceData) return null;
+
+    const totalAmount = tradeData.steps.reduce((sum, step) => {
+      const scaledAmount = formatUnits(
+        step.amount,
+        selectedTokenPair[0].decimals
+      );
+      return Big(sum).plus(scaledAmount).toString();
+    }, "0");
+
+    const costInUSDC = Big(totalAmount).mul(
+      Big(primePoolPriceData.currentPrice)
+    );
+    const totalCostInUSDC = formatUnits(
+      totalCost,
+      selectedTokenPair[1].decimals
+    );
+
+    const leverage = costInUSDC.div(totalCostInUSDC);
+
+    return leverage.toFixed(2);
+  };
+
+  const leverageValue = calculateLeverage();
 
   const formatDuration = (ttl: number) => {
     if (ttl < 3600) return `${Math.floor(ttl / 60)}m`;
@@ -173,7 +201,7 @@ export default function TradingForm({ isLong }: { isLong: boolean }) {
       <div className="flex mt-2 mb-6 flex-row gap-1 items-center border border-[#282324] rounded-[8px] w-fit px-2 py-1">
         <FlashIcon />
         <span className="text-sm font-medium text-[#1981F3] bg-[#1a1a1a80]">
-          85x Leverage
+          {leverageValue ? leverageValue + "x Leverage" : "--"}
         </span>
       </div>
       <div className="text-sm font-medium pb-3">For</div>
@@ -192,8 +220,12 @@ export default function TradingForm({ isLong }: { isLong: boolean }) {
       <div className="mt-5 mb-3 text-sm font-medium text-white">
         You Pay{" "}
         {totalCost
-          ? formatUnits(totalCost, selectedTokenPair[1].decimals)
-          : "--"}
+          ? formatTokenDisplayCondensed(
+              formatUnits(totalCost, selectedTokenPair[1].decimals),
+              selectedTokenPair[1].decimals
+            )
+          : "--"}{" "}
+        {selectedTokenPair[1].symbol}
       </div>
 
       <form.Subscribe

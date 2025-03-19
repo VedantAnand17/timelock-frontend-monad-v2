@@ -1,12 +1,16 @@
+import { useMarketData } from "@/context/MarketDataProvider";
+import { formatTokenDisplayCondensed } from "@/lib/format";
 import { preventMinusAndEKey, preventPasteNegative } from "@/lib/helper";
 import { useSelectedTokenPair } from "@/providers/SelectedTokenPairProvider";
 import type { AnyFieldApi } from "@tanstack/react-form";
+import Big from "big.js";
 import Image from "next/image";
 import { useEffect, useRef } from "react";
 
 const Input = ({ field }: { field: AnyFieldApi }) => {
   const { selectedTokenPair } = useSelectedTokenPair();
   const inputRef = useRef<HTMLInputElement>(null);
+  const { primePoolPriceData } = useMarketData();
 
   useEffect(() => {
     if (inputRef.current) {
@@ -38,9 +42,17 @@ const Input = ({ field }: { field: AnyFieldApi }) => {
           }}
           className="bg-transparent max-w-[136px] outline-none text-white text-[24px] font-medium"
         />
-        <span className="text-[#9CA3AF] text-xs font-medium">
-          1000 {selectedTokenPair[1].symbol}
-        </span>
+        <div className="text-[#9CA3AF] text-xs font-medium max-w-[106px] whitespace-nowrap overflow-scroll">
+          {primePoolPriceData?.currentPrice && field.state.value
+            ? formatTokenDisplayCondensed(
+                Big(primePoolPriceData?.currentPrice)
+                  .mul(Big(field.state.value))
+                  .toString(),
+                selectedTokenPair[1].decimals
+              )
+            : "--"}{" "}
+          {selectedTokenPair[1].symbol}
+        </div>
       </div>
       <div className="flex flex-row gap-2 items-start">
         <div className="flex items-center gap-[6px] text-sm justify-center rounded-md bg-[#0D0D0D] h-[36px] px-[12px]">

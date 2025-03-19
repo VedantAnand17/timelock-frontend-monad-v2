@@ -48,7 +48,7 @@ export async function GET(request: Request) {
     }
 
     const response = await fetch(
-      `${process.env.OHLC_BACKEND}/ohlc/${POOL_ADDRESS}?from=${from}&to=${to}&interval=${timeframe}`,
+      `${process.env.NEXT_PUBLIC_OHLC_BACKEND}/ohlc/${POOL_ADDRESS}?from=${from}&to=${to}&interval=${timeframe}`,
       {
         headers: {
           accept: "application/json",
