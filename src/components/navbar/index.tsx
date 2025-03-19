@@ -1,7 +1,9 @@
+"use client";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import ConnectButton from "./ConnectButton";
+import ChainStatus from "./ChainStatus";
 
 const NAV_LINKS = [
   {
@@ -39,14 +41,17 @@ export default function Navbar() {
               href={href}
               className={cn(
                 "text-white text-sm font-medium",
-                disabled && "text-[#A6B0C3] pointer-events-none",
+                disabled && "text-[#A6B0C3] pointer-events-none"
               )}
             >
               {title}
             </Link>
           ))}
         </ul>
-        <ConnectButton />
+        <div className="flex flex-row items-center gap-2">
+          <ChainStatus />
+          <ConnectButton />
+        </div>
       </nav>
     </div>
   );
