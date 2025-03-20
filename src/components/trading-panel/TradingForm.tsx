@@ -23,6 +23,7 @@ import { formatTokenDisplayCondensed } from "@/lib/format";
 import { useEffect, useState } from "react";
 import { USDC } from "@/lib/tokens";
 import { toast } from "sonner";
+import { CreatePositionDialog } from "../dialog/CreatePositionDialog";
 
 interface TradePreviewStep {
   amount: bigint;
@@ -42,6 +43,8 @@ interface TradePreviewResult {
 
 export default function TradingForm({ isLong }: { isLong: boolean }) {
   const { isPending, data: hash, writeContract } = useWriteContract();
+  const [isOpenCreatePositionDialog, setIsOpenCreatePositionDialog] =
+    useState(false);
   const [isMax, setIsMax] = useState(false);
   const { selectedTokenPair } = useSelectedTokenPair();
   const { address, isConnected } = useAccount();
@@ -213,7 +216,7 @@ export default function TradingForm({ isLong }: { isLong: boolean }) {
       liquidityToUse: tradeData.steps[0].liquidity,
     };
 
-    writeContract({
+    await writeContract({
       address: optionMarketAddress as `0x${string}`,
       abi: TRADE_EXECUTE_ABI,
       functionName: "mintOption",
@@ -228,93 +231,127 @@ export default function TradingForm({ isLong }: { isLong: boolean }) {
         },
       ],
     });
+
+    setIsOpenCreatePositionDialog(false);
+  };
+
+  const openCreatePositionDialog = () => {
+    setIsOpenCreatePositionDialog(true);
   };
 
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        form.handleSubmit();
-        executeTrade();
-      }}
-      className="relative"
-    >
-      <TradeTypeStrokeIcon
-        isLong={isLong}
-        className="absolute top-[10px] -left-[18px]"
-      />
-      <div className="text-sm font-medium pb-3">
-        {isLong ? "You Long" : "You Short"}
-      </div>
-      <form.Field
-        name="amount"
-        validators={{
-          // TODO: Add validation for max amount and probably use zod
-          onChange: ({ value }) =>
-            !value
-              ? "Amount is required"
-              : Number(value) <= 0
-              ? "Amount must be greater than 0"
-              : undefined,
+    <>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          form.handleSubmit();
+          if (amount && Big(amount).gt(0)) {
+            openCreatePositionDialog();
+          }
         }}
+        className="relative"
       >
-        {(field) => <Input setIsMax={setIsMax} field={field} />}
-      </form.Field>
-      <div className="flex mt-2 mb-6 flex-row gap-1 items-center border border-[#282324] rounded-[8px] w-fit px-2 py-1">
-        <FlashIcon />
-        <span className="text-sm font-medium text-[#1981F3] bg-[#1a1a1a80]">
-          {leverageValue ? leverageValue + "x Leverage" : "--"}
-        </span>
-      </div>
-      <div className="text-sm font-medium pb-3">For</div>
-      <BlueStrokeIcon className="absolute bottom-[96px] -left-[20px]" />
-      <DurationSelector
-        durations={durations}
-        selectedDurationIndex={selectedDurationIndex}
-        setSelectedDurationIndex={setSelectedDurationIndex}
-      />
-      <div className="mt-6">
-        <TradeExecutionDetails
-          premiumCost={premiumCost}
-          protocolFee={protocolFee}
+        <TradeTypeStrokeIcon
+          isLong={isLong}
+          className="absolute top-[10px] -left-[18px]"
         />
-      </div>
-      <div className="mt-5 mb-3 text-sm font-medium text-white">
-        You Pay{" "}
-        {totalCost
-          ? formatTokenDisplayCondensed(
-              formatUnits(totalCost, selectedTokenPair[1].decimals),
-              selectedTokenPair[1].decimals
-            )
-          : "--"}{" "}
-        {selectedTokenPair[1].symbol}
-      </div>
+        <div className="text-sm font-medium pb-3">
+          {isLong ? "You Long" : "You Short"}
+        </div>
+        <form.Field
+          name="amount"
+          validators={{
+            // TODO: Add validation for max amount and probably use zod
+            onChange: ({ value }) =>
+              !value
+                ? "Amount is required"
+                : Number(value) <= 0
+                ? "Amount must be greater than 0"
+                : undefined,
+          }}
+        >
+          {(field) => <Input setIsMax={setIsMax} field={field} />}
+        </form.Field>
+        <div className="flex mt-2 mb-6 flex-row gap-1 items-center border border-[#282324] rounded-[8px] w-fit px-2 py-1">
+          <FlashIcon />
+          <span className="text-sm font-medium text-[#1981F3] bg-[#1a1a1a80]">
+            {leverageValue ? leverageValue + "x Leverage" : "--"}
+          </span>
+        </div>
+        <div className="text-sm font-medium pb-3">For</div>
+        <BlueStrokeIcon className="absolute bottom-[96px] -left-[20px]" />
+        <DurationSelector
+          durations={durations}
+          selectedDurationIndex={selectedDurationIndex}
+          setSelectedDurationIndex={setSelectedDurationIndex}
+        />
+        <div className="mt-6">
+          <TradeExecutionDetails
+            premiumCost={premiumCost}
+            protocolFee={protocolFee}
+          />
+        </div>
+        <div className="mt-5 mb-3 text-sm font-medium text-white">
+          You Pay{" "}
+          {totalCost
+            ? formatTokenDisplayCondensed(
+                formatUnits(totalCost, selectedTokenPair[1].decimals),
+                selectedTokenPair[1].decimals
+              )
+            : "--"}{" "}
+          {selectedTokenPair[1].symbol}
+        </div>
 
-      <form.Subscribe
-        selector={(state) => [state.canSubmit, state.isSubmitting]}
-      >
-        {([canSubmit, isSubmitting]) => (
-          <>
-            <button
-              className={cn(
-                "w-full disabled:opacity-50 cursor-pointer bg-[#19DE92] text-[#0D0D0D] font-medium text-base rounded-[12px] py-3",
-                isLong ? "bg-[#19DE92]" : "bg-[#EC5058]"
-              )}
-              disabled={
-                !canSubmit || isSubmitting || isLoading || isError || isPending
-              }
-            >
-              {isLong
-                ? "Long " + selectedTokenPair[0].symbol
-                : "Short " + selectedTokenPair[0].symbol}
-            </button>
-          </>
-        )}
-      </form.Subscribe>
-      <div className="text-xs pt-3 text-center text-[#9CA3AF]">
-        You don&apos;t pay for losses on Timelock <u>How</u>?
-      </div>
-    </form>
+        <form.Subscribe
+          selector={(state) => [state.canSubmit, state.isSubmitting]}
+        >
+          {([canSubmit, isSubmitting]) => (
+            <>
+              <button
+                className={cn(
+                  "w-full disabled:opacity-50 cursor-pointer bg-[#19DE92] text-[#0D0D0D] font-medium text-base rounded-[12px] py-3",
+                  isLong ? "bg-[#19DE92]" : "bg-[#EC5058]"
+                )}
+                disabled={
+                  !canSubmit ||
+                  isSubmitting ||
+                  isLoading ||
+                  isError ||
+                  isPending
+                }
+              >
+                {isLong
+                  ? "Long " + selectedTokenPair[0].symbol
+                  : "Short " + selectedTokenPair[0].symbol}
+              </button>
+              <CreatePositionDialog
+                positionSize={amount}
+                leverage={leverageValue}
+                youPay={totalCost}
+                premiumCost={premiumCost}
+                duration={formatDuration(ttlIV[selectedDurationIndex].ttl)}
+                callAsset={selectedTokenPair[0]}
+                putAsset={selectedTokenPair[1]}
+                isLong={isLong}
+                isOpen={isOpenCreatePositionDialog}
+                setIsOpen={setIsOpenCreatePositionDialog}
+                onSubmit={executeTrade}
+                disabled={
+                  !canSubmit ||
+                  isSubmitting ||
+                  isLoading ||
+                  isError ||
+                  isPending
+                }
+              />
+            </>
+          )}
+        </form.Subscribe>
+        <div className="text-xs pt-3 text-center text-[#9CA3AF]">
+          You don&apos;t pay for losses on Timelock <u>How</u>?
+        </div>
+      </form>
+    </>
   );
 }
