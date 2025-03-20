@@ -7,11 +7,24 @@ import LineChart from "./LineChart";
 import { useMarketData } from "@/context/MarketDataProvider";
 import { formatTokenDisplayCondensed } from "@/lib/format";
 import Big from "big.js";
+import { useIvData } from "@/hooks/useIvData";
 
 export default function SelectedTokenPairDetails() {
   const { selectedTokenPair } = useSelectedTokenPair();
+  const { optionMarketAddress } = useMarketData();
   const { ttlIV, selectedDurationIndex, primePoolPriceData } = useMarketData();
   const selectedDurationIv = ttlIV[selectedDurationIndex].IV;
+  const {
+    data: ivData,
+    isLoading,
+    error,
+  } = useIvData(optionMarketAddress, selectedDurationIv);
+  const selectedDurationIvData = ivData?.ivUpdates.map((iv) => ({
+    timestamp: iv.timestamp,
+    value: iv.ttlIV.find((iv) =>
+      Big(iv.ttl).eq(ttlIV[selectedDurationIndex].ttl)
+    )?.IV,
+  }));
 
   return (
     <div className="flex flex-row justify-between">
@@ -43,14 +56,18 @@ export default function SelectedTokenPairDetails() {
       </div>
       <div className="flex flex-row gap-4 items-end">
         {/* TODO: Later only send numbers so neg pos can be checked  */}
-        <StatsCard title="TVL" value="$1.94M" percentage="10.50%" />
-        <StatsCard title="Volume(24H)" value="$3.4M" percentage="8.50%" />
+        <StatsCard title="TVL" value="$120.94M" percentage="10.50%" />
+        <StatsCard title="Volume(24H)" value="$13.4M" percentage="8.50%" />
         <div className="px-4 py-3 bg-[#0d0d0d] flex flex-row items-center gap-5 h-fit rounded-xl">
           <span className="text-[#616E85] text-xs font-medium">IV</span>
           <div className="flex flex-row items-center justify-between gap-1">
             <span className="">{selectedDurationIv}</span>
             <div className="w-[200px] h-[38px]">
-              <LineChart />
+              {error ? null : isLoading ? (
+                <div className="ml-5 w-full h-full bg-gray-800 animate-pulse rounded-md" />
+              ) : (
+                <LineChart data={selectedDurationIvData} />
+              )}
             </div>
           </div>
         </div>
@@ -73,8 +90,8 @@ const StatsCard = ({
       <span className="text-[#616E85] text-xs font-medium">{title}</span>
       <div className="flex flex-row items-center justify-between gap-10">
         <span className="">{value}</span>
-        <div className="text-[#EC5058] text-xs font-semibold flex flex-row items-center">
-          <ChevronDown /> {percentage}
+        <div className="text-[#19DE92] text-xs font-semibold flex flex-row items-center">
+          <ChevronDown className="rotate-180" /> {percentage}
         </div>
       </div>
     </div>

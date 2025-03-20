@@ -4,46 +4,34 @@ import {
   Line,
   LineChart as RechartsLineChart,
   ResponsiveContainer,
+  XAxis,
+  YAxis,
 } from "recharts";
 
-const data = [
-  { month: "Jan 22", value: 1000 },
-  { month: "Feb 22", value: 1800 },
-  { month: "Mar 22", value: 1400 },
-  { month: "Apr 22", value: 2300 },
-  { month: "May 22", value: 2100 },
-  { month: "Jun 22", value: 3400 },
-  { month: "Jul 22", value: 2800 },
-  { month: "Aug 22", value: 3900 },
-  { month: "Sep 22", value: 5200 },
-  { month: "Oct 22", value: 4700 },
-  { month: "Nov 22", value: 6100 },
-  { month: "Dec 22", value: 5800 },
-  { month: "Jan 23", value: 7400 },
-  { month: "Feb 23", value: 6900 },
-  { month: "Mar 23", value: 8500 },
-  { month: "Apr 23", value: 7800 },
-  { month: "May 23", value: 9200 },
-  { month: "Jun 23", value: 8900 },
-  { month: "Jul 23", value: 10500 },
-  { month: "Aug 23", value: 9800 },
-  { month: "Sep 23", value: 11400 },
-  { month: "Oct 23", value: 12800 },
-  { month: "Nov 23", value: 11900 },
-  { month: "Dec 23", value: 13500 },
-];
-
 export default function LineChart({
+  data,
   width = "100%",
   height = "100%",
 }: {
+  data:
+    | {
+        timestamp: number;
+        value: string | undefined;
+      }[]
+    | undefined;
   width?: string;
   height?: string;
 }) {
+  const formattedData =
+    data?.map((item) => ({
+      timestamp: item.timestamp,
+      value: item.value ? parseFloat(item.value) : null,
+    })) || [];
+
   return (
-    <ResponsiveContainer width={width} height={height}>
+    <ResponsiveContainer width={width} height={height} aspect={undefined}>
       <RechartsLineChart
-        data={data}
+        data={formattedData}
         margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
       >
         <defs>
@@ -55,6 +43,13 @@ export default function LineChart({
             <stop offset="100%" stopColor="#19DE9280" />
           </linearGradient>
         </defs>
+        <XAxis
+          dataKey="timestamp"
+          type="number"
+          hide={true}
+          domain={["dataMin", "dataMax"]}
+        />
+        <YAxis domain={["auto", "auto"]} hide={true} />
         <Line
           type="monotone"
           dataKey="value"
@@ -62,6 +57,7 @@ export default function LineChart({
           strokeWidth={1}
           dot={false}
           activeDot={false}
+          isAnimationActive={true}
         />
       </RechartsLineChart>
     </ResponsiveContainer>
