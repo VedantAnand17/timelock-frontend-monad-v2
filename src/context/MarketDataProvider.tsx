@@ -9,6 +9,7 @@ import {
   Dispatch,
 } from "react";
 import { IVDataPoint, PriceData } from "@/lib/api";
+import { usePriceQuery } from "@/hooks/usePriceQuery";
 
 interface MarketData {
   ttlIV: IVDataPoint[];
@@ -37,13 +38,18 @@ export function MarketDataProvider({
   primePoolPriceData,
 }: MarketDataProviderProps) {
   const [selectedDurationIndex, setSelectedDurationIndex] = useState(1);
+  const { data: priceData } = usePriceQuery();
+  const updatedPrimePoolPriceData = priceData?.find(
+    (price) => price.poolAddress === primePool
+  );
+
   return (
     <MarketDataContext.Provider
       value={{
         ttlIV,
         optionMarketAddress,
         primePool,
-        primePoolPriceData,
+        primePoolPriceData: updatedPrimePoolPriceData ?? primePoolPriceData,
         selectedDurationIndex,
         setSelectedDurationIndex,
       }}
