@@ -7,6 +7,7 @@ import { Toaster } from "sonner";
 import { virtualBase } from "@/lib/chains";
 import { RPC_URL } from "@/lib/rpcs";
 import { SelectedTokenPairProvider } from "./SelectedTokenPairProvider";
+import { ErrorIcon, SuccessIcon } from "@/icons";
 
 const config = createConfig(
   getDefaultConfig({
@@ -21,7 +22,7 @@ const config = createConfig(
     appDescription: "Timelock Trade",
     appUrl: "https://timelock.trade",
     appIcon: "https://timelock.trade/logo.png",
-  }),
+  })
 );
 
 const queryClient = new QueryClient();
@@ -31,7 +32,24 @@ export const Provider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   return (
     <>
-      <Toaster />
+      <Toaster
+        icons={{
+          success: <SuccessIcon />,
+          error: <ErrorIcon />,
+        }}
+        toastOptions={{
+          style: {
+            gap: "16px",
+            background: "#171717",
+            color: "#fff",
+            borderRadius: "16px",
+            border: "1px solid #ffffff0f",
+          },
+          classNames: {
+            description: "toast-description",
+          },
+        }}
+      />
 
       <WagmiProvider config={config}>
         <QueryClientProvider client={queryClient}>

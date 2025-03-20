@@ -11,6 +11,7 @@ import {
   useAccount,
   useBalance,
   useReadContract,
+  useWaitForTransactionReceipt,
   useWriteContract,
 } from "wagmi";
 import { TRADE_PREVIEW_ADDRESS } from "@/lib/contracts";
@@ -21,6 +22,7 @@ import { TRADE_EXECUTE_ABI } from "@/lib/abis/tradeExecuteAbi";
 import { formatTokenDisplayCondensed } from "@/lib/format";
 import { useEffect, useState } from "react";
 import { USDC } from "@/lib/tokens";
+import { toast } from "sonner";
 
 interface TradePreviewStep {
   amount: bigint;
@@ -39,7 +41,7 @@ interface TradePreviewResult {
 }
 
 export default function TradingForm({ isLong }: { isLong: boolean }) {
-  const { isPending, writeContract } = useWriteContract();
+  const { isPending, data: hash, writeContract } = useWriteContract();
   const [isMax, setIsMax] = useState(false);
   const { selectedTokenPair } = useSelectedTokenPair();
   const { address, isConnected } = useAccount();
@@ -95,6 +97,14 @@ export default function TradingForm({ isLong }: { isLong: boolean }) {
   const amountFromPreview = tradeData?.steps[0].amount;
 
   useEffect(() => {
+    if (isError) {
+      toast.error("Failed to fetch liquidity data", {
+        description: "Please try again later.",
+      });
+    }
+  }, [isError]);
+
+  useEffect(() => {
     if (!isLoading && !isError && amountFromPreview && isMax) {
       form.setFieldValue(
         "amount",
@@ -134,7 +144,39 @@ export default function TradingForm({ isLong }: { isLong: boolean }) {
 
   const durations = ttlIV.map((item) => formatDuration(item.ttl));
 
-  const { writeContract: writeApproval } = useWriteContract();
+  const { data: approvalHash, writeContract: writeApproval } =
+    useWriteContract();
+
+  const { error: approvalError } = useWaitForTransactionReceipt({
+    hash: approvalHash,
+  });
+
+  const { error: tradeError, data: executedTradeData } =
+    useWaitForTransactionReceipt({
+      hash: hash,
+    });
+
+  useEffect(() => {
+    if (executedTradeData?.status === "success") {
+      toast.success("Trade Placed");
+    }
+  }, [executedTradeData]);
+
+  useEffect(() => {
+    if (approvalError) {
+      toast.error("Approval Failed", {
+        description: "Please try again later.",
+      });
+    }
+  }, [approvalError]);
+
+  useEffect(() => {
+    if (tradeError) {
+      toast.error("Trade Could not be executed", {
+        description: "Please try again later.",
+      });
+    }
+  }, [tradeError]);
 
   const { data: allowance } = useReadContract({
     address: selectedTokenPair[1].address as `0x${string}`,
@@ -153,43 +195,39 @@ export default function TradingForm({ isLong }: { isLong: boolean }) {
     )
       return;
 
-    try {
-      if (Big(allowance.toString()).lt(totalCost.toString())) {
-        await writeApproval({
-          address: selectedTokenPair[1].address as `0x${string}`,
-          abi: erc20Abi,
-          functionName: "approve",
-          args: [optionMarketAddress as `0x${string}`, totalCost as bigint],
-        });
-      }
-
-      const optionTicks = {
-        _handler: LIQUIDITY_HANDLER_ADDRESS_USDC,
-        pool: primePool,
-        hook: "0x0000000000000000000000000000000000000000",
-        tickLower: tradeData.steps[0].tickLower,
-        tickUpper: tradeData.steps[0].tickUpper,
-        liquidityToUse: tradeData.steps[0].liquidity,
-      };
-
-      writeContract({
-        address: optionMarketAddress as `0x${string}`,
-        abi: TRADE_EXECUTE_ABI,
-        functionName: "mintOption",
-        args: [
-          {
-            optionTicks: [optionTicks],
-            tickLower: tradeData.steps[0].tickLower,
-            tickUpper: tradeData.steps[0].tickUpper,
-            ttl: ttlIV[selectedDurationIndex].ttl,
-            isCall: isLong,
-            maxCostAllowance: tradeData.totalCost,
-          },
-        ],
+    if (Big(allowance.toString()).lt(totalCost.toString())) {
+      await writeApproval({
+        address: selectedTokenPair[1].address as `0x${string}`,
+        abi: erc20Abi,
+        functionName: "approve",
+        args: [optionMarketAddress as `0x${string}`, totalCost as bigint],
       });
-    } catch (error) {
-      console.error("Transaction failed:", error);
     }
+
+    const optionTicks = {
+      _handler: LIQUIDITY_HANDLER_ADDRESS_USDC,
+      pool: primePool,
+      hook: "0x0000000000000000000000000000000000000000",
+      tickLower: tradeData.steps[0].tickLower,
+      tickUpper: tradeData.steps[0].tickUpper,
+      liquidityToUse: tradeData.steps[0].liquidity,
+    };
+
+    writeContract({
+      address: optionMarketAddress as `0x${string}`,
+      abi: TRADE_EXECUTE_ABI,
+      functionName: "mintOption",
+      args: [
+        {
+          optionTicks: [optionTicks],
+          tickLower: tradeData.steps[0].tickLower,
+          tickUpper: tradeData.steps[0].tickUpper,
+          ttl: ttlIV[selectedDurationIndex].ttl,
+          isCall: isLong,
+          maxCostAllowance: totalCost,
+        },
+      ],
+    });
   };
 
   return (

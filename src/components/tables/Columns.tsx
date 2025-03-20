@@ -10,8 +10,10 @@ import Big from "big.js";
 import { useMarketData } from "@/context/MarketDataProvider";
 import { formatTokenDisplayCondensed } from "@/lib/format";
 import { useSelectedTokenPair } from "@/providers/SelectedTokenPairProvider";
-import { useWriteContract } from "wagmi";
+import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { TRADE_EXECUTE_ABI } from "@/lib/abis/tradeExecuteAbi";
+import { useEffect } from "react";
+import { toast } from "sonner";
 
 const columnHelper = createColumnHelper<Position>();
 
@@ -203,7 +205,25 @@ const CloseCell = ({
   swapData: string[];
   liquidityToExercise: string[];
 }) => {
-  const { isPending, writeContract } = useWriteContract();
+  const { isPending, writeContract, data: hash } = useWriteContract();
+  const { data: executedTradeData, error } = useWaitForTransactionReceipt({
+    hash: hash,
+  });
+
+  useEffect(() => {
+    if (executedTradeData?.status === "success") {
+      toast.success("Position Closed");
+    }
+  }, [executedTradeData]);
+
+  useEffect(() => {
+    if (error) {
+      toast.error("Position Close Failed", {
+        description: "Please try again later.",
+      });
+    }
+  }, [error]);
+
   const { optionMarketAddress } = useMarketData();
 
   return (
