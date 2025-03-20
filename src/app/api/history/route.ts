@@ -81,7 +81,7 @@ export async function GET(request: Request) {
       h.push(_data[2]);
       l.push(_data[3]);
       c.push(_data[4]);
-      v.push(_data[5]);
+      v.push(_data[6]);
     }
 
     const barsRes = {

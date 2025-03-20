@@ -29,7 +29,6 @@ export default function SelectedTokenPairDetails() {
         </div>
         <div className="flex flex-row items-center mt-3 gap-3">
           <span className="text-white text-[30px] font-medium">
-            {"$"}
             {primePoolPriceData?.currentPrice
               ? formatTokenDisplayCondensed(
                   Big(primePoolPriceData?.currentPrice).toString(),

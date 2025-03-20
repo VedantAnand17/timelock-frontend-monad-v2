@@ -5,9 +5,15 @@ import { useSelectedTokenPair } from "@/providers/SelectedTokenPairProvider";
 import type { AnyFieldApi } from "@tanstack/react-form";
 import Big from "big.js";
 import Image from "next/image";
-import { useEffect, useRef } from "react";
+import { Dispatch, SetStateAction, useEffect, useRef } from "react";
 
-const Input = ({ field }: { field: AnyFieldApi }) => {
+const Input = ({
+  field,
+  setIsMax,
+}: {
+  field: AnyFieldApi;
+  setIsMax: Dispatch<SetStateAction<boolean>>;
+}) => {
   const { selectedTokenPair } = useSelectedTokenPair();
   const inputRef = useRef<HTMLInputElement>(null);
   const { primePoolPriceData } = useMarketData();
@@ -29,7 +35,12 @@ const Input = ({ field }: { field: AnyFieldApi }) => {
           id={field.name}
           name={field.name}
           value={field.state.value}
-          onChange={(e) => field.handleChange(e.target.value)}
+          onChange={(e) => {
+            if (setIsMax) {
+              setIsMax(false);
+            }
+            field.handleChange(e.target.value);
+          }}
           onWheel={(e) => e.preventDefault()}
           onPaste={preventPasteNegative}
           min={0.0}
@@ -64,7 +75,15 @@ const Input = ({ field }: { field: AnyFieldApi }) => {
           />
           {selectedTokenPair[0].symbol}
         </div>
-        <button className="text-sm font-medium mt-2 cursor-pointer">MAX</button>
+        <button
+          type="button"
+          className="text-sm font-medium mt-2 cursor-pointer"
+          onClick={() => {
+            setIsMax(true);
+          }}
+        >
+          MAX
+        </button>
       </div>
     </div>
   );

@@ -10,6 +10,8 @@ import Big from "big.js";
 import { useMarketData } from "@/context/MarketDataProvider";
 import { formatTokenDisplayCondensed } from "@/lib/format";
 import { useSelectedTokenPair } from "@/providers/SelectedTokenPairProvider";
+import { useWriteContract } from "wagmi";
+import { TRADE_EXECUTE_ABI } from "@/lib/abis/tradeExecuteAbi";
 
 const columnHelper = createColumnHelper<Position>();
 
@@ -91,19 +93,32 @@ const columns = [
           .decimals;
       return (
         <div className="flex flex-row items-center gap-1 text-[13px]">
-          <span
-            className={cn(
-              "text-[#19DE92]",
-              Big(value).lt(0) ? "text-[#EC5058]" : "text-[#19DE92]"
-            )}
-          >
-            {value
-              ? formatTokenDisplayCondensed(
+          {Big(value).lte(0) ? (
+            <div className="flex flex-row items-center gap-2">
+              <span className="line-through text-white/[0.5]">
+                {formatTokenDisplayCondensed(
                   formatUnits(BigInt(value), decimals),
                   decimals
-                )
-              : "--"}
-          </span>
+                )}{" "}
+              </span>
+              <span className="">0 USDC</span>
+              <span className="underline text-white/[0.5] underline-offset-2 cursor-pointer">
+                How?
+              </span>
+            </div>
+          ) : (
+            <span className="text-[#19DE92]">
+              {formatTokenDisplayCondensed(
+                formatUnits(BigInt(value), decimals),
+                decimals
+              )}{" "}
+              {
+                allTokens[
+                  info.row.original.putAsset.toLowerCase() as `0x${string}`
+                ].symbol
+              }
+            </span>
+          )}
         </div>
       );
     },
@@ -150,10 +165,10 @@ const columns = [
       return (
         <div className="text-[11px] text-white/[0.5] flex flex-col gap-1">
           <span>{`${hoursRemaining}h ${minutesRemaining}m`}</span>
-          <div className="w-[130px] h-[10px] bg-[#1A1A1A] rounded-md relative">
+          <div className="w-[130px] h-[10px] bg-[#1A1A1A] rounded-md relative overflow-hidden">
             <div
               className={`absolute top-0 left-0 h-full rounded-md ${
-                remaining <= 0 ? "bg-[#EC5058]" : "bg-[#19DE92]"
+                !info.row.original.isCall ? "bg-[#EC5058]" : "bg-[#19DE92]"
               }`}
               style={{ width: `${elapsedPercentage}%` }}
             ></div>
@@ -164,13 +179,59 @@ const columns = [
   }),
   columnHelper.display({
     id: "actions",
-    cell: () => (
-      <button className="text-[#EC5058] transition-colors cursor-pointer">
-        Close
-      </button>
+    cell: (info) => (
+      <CloseCell
+        optionId={info.row.original.exerciseParams.optionId}
+        swapper={info.row.original.exerciseParams.swapper}
+        swapData={info.row.original.exerciseParams.swapData}
+        liquidityToExercise={
+          info.row.original.exerciseParams.liquidityToExercise
+        }
+      />
     ),
   }),
 ];
+
+const CloseCell = ({
+  optionId,
+  swapper,
+  swapData,
+  liquidityToExercise,
+}: {
+  optionId: string;
+  swapper: string[];
+  swapData: string[];
+  liquidityToExercise: string[];
+}) => {
+  const { isPending, writeContract } = useWriteContract();
+  const { optionMarketAddress } = useMarketData();
+
+  return (
+    <button
+      disabled={isPending}
+      onClick={() => {
+        writeContract({
+          address: optionMarketAddress as `0x${string}`,
+          abi: TRADE_EXECUTE_ABI,
+          functionName: "exerciseOption",
+          args: [
+            {
+              optionId,
+              swapper,
+              swapData,
+              liquidityToExercise,
+            },
+          ],
+        });
+      }}
+      className={cn(
+        "text-[#EC5058] disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
+      )}
+    >
+      Close
+    </button>
+  );
+};
 
 const CurrentPriceCell = () => {
   const { primePoolPriceData } = useMarketData();
@@ -183,7 +244,8 @@ const CurrentPriceCell = () => {
             Big(primePoolPriceData?.currentPrice).toString(),
             selectedTokenPair[1].decimals
           )
-        : "--"}
+        : "--"}{" "}
+      {selectedTokenPair[1].symbol}
     </span>
   );
 };

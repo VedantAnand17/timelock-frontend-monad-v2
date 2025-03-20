@@ -11,6 +11,7 @@ import columns from "./Columns";
 
 export default function Tables() {
   const { data: positions } = usePositionsTableData();
+
   const positionsData = positions?.positions;
 
   const table = useReactTable({

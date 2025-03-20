@@ -7,13 +7,20 @@ import { cn } from "@/lib/utils";
 import { useForm, useStore } from "@tanstack/react-form";
 import { useMarketData } from "@/context/MarketDataProvider";
 import { LIQUIDITY_HANDLER_ADDRESS_USDC } from "@/lib/contracts";
-import { useAccount, useReadContract, useWriteContract } from "wagmi";
+import {
+  useAccount,
+  useBalance,
+  useReadContract,
+  useWriteContract,
+} from "wagmi";
 import { TRADE_PREVIEW_ADDRESS } from "@/lib/contracts";
 import { TRADE_PREVIEW_ABI } from "@/lib/abis/tradePreviewAbi";
 import { formatUnits, parseUnits, erc20Abi } from "viem";
 import { Big } from "big.js";
 import { TRADE_EXECUTE_ABI } from "@/lib/abis/tradeExecuteAbi";
 import { formatTokenDisplayCondensed } from "@/lib/format";
+import { useEffect, useState } from "react";
+import { USDC } from "@/lib/tokens";
 
 interface TradePreviewStep {
   amount: bigint;
@@ -33,8 +40,9 @@ interface TradePreviewResult {
 
 export default function TradingForm({ isLong }: { isLong: boolean }) {
   const { isPending, writeContract } = useWriteContract();
+  const [isMax, setIsMax] = useState(false);
   const { selectedTokenPair } = useSelectedTokenPair();
-  const { address } = useAccount();
+  const { address, isConnected } = useAccount();
   const {
     ttlIV,
     selectedDurationIndex,
@@ -53,6 +61,14 @@ export default function TradingForm({ isLong }: { isLong: boolean }) {
   const amount = useStore(form.store, (state) => state.values.amount);
   const scaledAmount = parseUnits(amount, selectedTokenPair[0].decimals);
 
+  const { data: balanceData, isLoading: isBalanceLoading } = useBalance({
+    address: address,
+    token: USDC.address as `0x${string}`,
+    query: {
+      enabled: isConnected && !!address,
+    },
+  });
+
   const { data, isError, isLoading } = useReadContract({
     address: TRADE_PREVIEW_ADDRESS,
     abi: TRADE_PREVIEW_ABI,
@@ -61,12 +77,14 @@ export default function TradingForm({ isLong }: { isLong: boolean }) {
       optionMarketAddress,
       LIQUIDITY_HANDLER_ADDRESS_USDC,
       isLong,
-      scaledAmount,
+      isMax ? BigInt("100000000000000000000") : scaledAmount,
       ttlIV[selectedDurationIndex].ttl,
-      0,
+      isMax ? balanceData?.value : 0,
     ],
     query: {
-      enabled: !!amount && Big(amount).gt(0),
+      enabled: isMax
+        ? true
+        : !!amount && Big(amount).gt(0) && !isBalanceLoading,
     },
   });
 
@@ -74,17 +92,24 @@ export default function TradingForm({ isLong }: { isLong: boolean }) {
   const premiumCost = tradeData?.premiumCost;
   const totalCost = tradeData?.totalCost;
   const protocolFee = tradeData?.protocolFee;
+  const amountFromPreview = tradeData?.steps[0].amount;
+
+  useEffect(() => {
+    if (!isLoading && !isError && amountFromPreview && isMax) {
+      form.setFieldValue(
+        "amount",
+        formatUnits(amountFromPreview, selectedTokenPair[0].decimals)
+      );
+    }
+  }, [amountFromPreview, form, isError, isLoading, isMax, selectedTokenPair]);
 
   const calculateLeverage = () => {
     if (!tradeData?.steps || !totalCost || !primePoolPriceData) return null;
 
-    const totalAmount = tradeData.steps.reduce((sum, step) => {
-      const scaledAmount = formatUnits(
-        step.amount,
-        selectedTokenPair[0].decimals
-      );
-      return Big(sum).plus(scaledAmount).toString();
-    }, "0");
+    const totalAmount = formatUnits(
+      tradeData.steps[0].amount,
+      selectedTokenPair[0].decimals
+    );
 
     const costInUSDC = Big(totalAmount).mul(
       Big(primePoolPriceData.currentPrice)
@@ -196,7 +221,7 @@ export default function TradingForm({ isLong }: { isLong: boolean }) {
               : undefined,
         }}
       >
-        {(field) => <Input field={field} />}
+        {(field) => <Input setIsMax={setIsMax} field={field} />}
       </form.Field>
       <div className="flex mt-2 mb-6 flex-row gap-1 items-center border border-[#282324] rounded-[8px] w-fit px-2 py-1">
         <FlashIcon />
