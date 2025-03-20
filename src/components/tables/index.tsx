@@ -8,9 +8,12 @@ import {
 } from "@tanstack/react-table";
 import { useMemo } from "react";
 import columns from "./Columns";
+import { useAccount } from "wagmi";
+import { ErrorIcon } from "@/icons";
 
 export default function Tables() {
-  const { data: positions } = usePositionsTableData();
+  const { data: positions, isLoading, error } = usePositionsTableData();
+  const { isConnected } = useAccount();
 
   const positionsData = positions?.positions;
 
@@ -23,17 +26,40 @@ export default function Tables() {
     getCoreRowModel: getCoreRowModel(),
   });
 
-  return (
-    <div className="border border-[#1A1A1A] rounded-md mt-4 relative">
-      <div className="flex flex-row items-center border-b border-[#1A1A1A] gap-6 pl-6 ">
-        <span className="text-sm font-semibold border-b border-b-white py-4">
-          Positions
-        </span>
-        <span className="text-sm font-semibold text-[#9CA3AF] pointer-events-none">
-          History
-        </span>
-      </div>
+  const renderTable = () => {
+    if (!isConnected) {
+      return (
+        <div className="text-[#9CA3AF] text-xs flex justify-center items-center h-[200px] italic">
+          Connect wallet to see your positions
+        </div>
+      );
+    }
 
+    if (isLoading) {
+      return (
+        <div className="text-[#9CA3AF] text-xs flex justify-center items-center h-[200px] italic">
+          Loading...
+        </div>
+      );
+    }
+
+    if (error) {
+      return (
+        <div className="text-[#9CA3AF] text-xs flex justify-center items-center h-[200px] italic flex-row gap-2">
+          <ErrorIcon /> Failed to load positions
+        </div>
+      );
+    }
+
+    if (!positionsData || positionsData?.length === 0) {
+      return (
+        <div className="text-[#9CA3AF] text-xs flex justify-center items-center h-[200px] italic">
+          Open your first position to get started{" "}
+        </div>
+      );
+    }
+
+    return (
       <div className="overflow-x-auto overflow-hidden">
         <table className="w-full">
           <thead>
@@ -73,6 +99,17 @@ export default function Tables() {
           </tbody>
         </table>
       </div>
+    );
+  };
+
+  return (
+    <div className="border border-[#1A1A1A] rounded-md mt-4 relative">
+      <div className="flex flex-row items-center border-b border-[#1A1A1A] gap-6 pl-6 ">
+        <span className="text-sm font-semibold border-b border-b-white py-4">
+          Positions
+        </span>
+      </div>
+      {renderTable()}
     </div>
   );
 }
