@@ -183,6 +183,7 @@ const columns = [
     id: "actions",
     cell: (info) => (
       <CloseCell
+        disabled={Big(info.row.original.value).lte(0)}
         optionId={info.row.original.exerciseParams.optionId}
         swapper={info.row.original.exerciseParams.swapper}
         swapData={info.row.original.exerciseParams.swapData}
@@ -199,11 +200,13 @@ const CloseCell = ({
   swapper,
   swapData,
   liquidityToExercise,
+  disabled,
 }: {
   optionId: string;
   swapper: string[];
   swapData: string[];
   liquidityToExercise: string[];
+  disabled: boolean;
 }) => {
   const { isPending, writeContract, data: hash } = useWriteContract();
   const { data: executedTradeData, error } = useWaitForTransactionReceipt({
@@ -230,6 +233,10 @@ const CloseCell = ({
     <button
       disabled={isPending}
       onClick={() => {
+        if (disabled) {
+          toast.error("Position cannot be closed right now. PnL < 0");
+          return;
+        }
         writeContract({
           address: optionMarketAddress as `0x${string}`,
           abi: TRADE_EXECUTE_ABI,
