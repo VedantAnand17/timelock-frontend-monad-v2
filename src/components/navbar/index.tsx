@@ -31,7 +31,7 @@ const NAV_LINKS = [
 export default function Navbar() {
   return (
     <div className="w-full bg-[#0D0D0D]">
-      <nav className="flex flex-row items-center justify-between w-full mx-auto max-w-[1440px] py-[14px]">
+      <nav className="flex flex-row items-center justify-between w-full mx-auto max-w-[1440px] py-[14px] px-[24px]">
         {/* TODO: Replace with text if we can */}
         <Image src="/timelock-logo.png" alt="logo" width={180} height={20} />
         <ul className="flex flex-row items-center gap-[28px]">

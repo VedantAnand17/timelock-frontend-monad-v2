@@ -1,18 +1,12 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { Provider } from "@/providers/Providers";
 // import { ReactScan } from "@/components/ReactScan";
 
-// TODO: Replace with the correct font later
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const ibmFont = localFont({
+  src: "./ibm.ttf",
+  variable: "--font-ibm",
 });
 
 // TODO: Replace this later
@@ -29,9 +23,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       {/* {process.env.NODE_ENV === "development" && <ReactScan />} */}
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${ibmFont.variable} antialiased`}>
         <Provider>{children}</Provider>
       </body>
     </html>

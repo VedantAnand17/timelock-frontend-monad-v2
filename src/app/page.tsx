@@ -24,14 +24,20 @@ export default async function Home() {
       primePool={market.market.primePool}
       primePoolPriceData={primePoolPriceData}
     >
-      <main>
+      <main style={{ fontFamily: "var(--font-ibm)" }}>
         <Navbar />
-        <div className=" max-w-[1440px] flex flex-row gap-6 mx-auto border-t border-t-[#1A1A1A]">
-          <div className="pt-6 w-full max-w-[1054px]">
+        <div className=" max-w-[1440px] flex flex-row mx-auto border-t border-t-[#1A1A1A]">
+          <div
+            className="pt-6 pl-6 w-full max-w-[1054px] pr-6"
+            style={{
+              background:
+                "linear-gradient(180deg, rgba(11, 74, 143, 0.06) 0%, rgba(0, 0, 0, 0.00) 100%), #0D0D0D",
+            }}
+          >
             <SelectedTokenPairDetails />
             {/* TODO: check border color and corners */}
-            <div className="border border-[#1A1A1A] p-4 rounded-md mt-4 relative">
-              <div className="mb-4 bg-black h-[430px] flex items-center justify-center">
+            <div className="border border-[#1A1A1A] p-[12px] pb-[0px] rounded-md mt-4 relative">
+              <div className="mb-4 h-[500px] flex items-center justify-center">
                 <Graph />
               </div>
               {/* <TokenPairSelector /> */}

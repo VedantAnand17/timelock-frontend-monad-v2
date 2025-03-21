@@ -26,7 +26,7 @@ const Input = ({
 
   return (
     <div className="p-[12px_10px_12px_16px] flex gap-1 flex-row rounded-xl border border-[#282324] bg-[#1a1a1a80]">
-      <div className="flex flex-col gap-0">
+      <div className="flex flex-col gap-0 grow-1">
         <input
           type="number"
           ref={inputRef}

@@ -1,4 +1,4 @@
-import Big from "big.js";
+// import Big from "big.js";
 import { NextResponse } from "next/server";
 
 const POOL_ADDRESS = "0xd0b53D9277642d899DF5C87A3966A349A798F224";
@@ -74,7 +74,7 @@ export async function GET(request: Request) {
     const h = [];
     const l = [];
     const c = [];
-    const v = [];
+    // const v = [];
 
     for (const _data of data) {
       t.push(_data[0]);
@@ -82,7 +82,7 @@ export async function GET(request: Request) {
       h.push(_data[2]);
       l.push(_data[3]);
       c.push(_data[4]);
-      v.push(Big(_data[6]).div(1e6));
+      // v.push(Big(_data[6]).div(1e6));
     }
 
     const barsRes = {
@@ -91,7 +91,7 @@ export async function GET(request: Request) {
       h: h,
       l: l,
       c: c,
-      v: v,
+      // v: v,
       s: status,
     };
 

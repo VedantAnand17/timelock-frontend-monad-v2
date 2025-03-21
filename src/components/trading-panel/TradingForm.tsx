@@ -24,6 +24,8 @@ import { useEffect, useState } from "react";
 import { USDC } from "@/lib/tokens";
 import { toast } from "sonner";
 import { CreatePositionDialog } from "../dialog/CreatePositionDialog";
+import { useSettingsStore } from "@/stores/settingsStore";
+import { virtualBase } from "@/lib/chains";
 
 interface TradePreviewStep {
   amount: bigint;
@@ -47,7 +49,9 @@ export default function TradingForm({ isLong }: { isLong: boolean }) {
     useState(false);
   const [isMax, setIsMax] = useState(false);
   const { selectedTokenPair } = useSelectedTokenPair();
-  const { address, isConnected } = useAccount();
+  const { skipOrderConfirmation } = useSettingsStore();
+  const { address, isConnected, chainId } = useAccount();
+  const isChainSupported = chainId === virtualBase.chainId;
   const {
     ttlIV,
     selectedDurationIndex,
@@ -246,8 +250,12 @@ export default function TradingForm({ isLong }: { isLong: boolean }) {
           e.preventDefault();
           e.stopPropagation();
           form.handleSubmit();
-          if (amount && Big(amount).gt(0)) {
-            openCreatePositionDialog();
+          if (skipOrderConfirmation) {
+            executeTrade();
+          } else {
+            if (amount && Big(amount).gt(0)) {
+              openCreatePositionDialog();
+            }
           }
         }}
         className="relative"
@@ -314,6 +322,8 @@ export default function TradingForm({ isLong }: { isLong: boolean }) {
                   isLong ? "bg-[#19DE92]" : "bg-[#EC5058]"
                 )}
                 disabled={
+                  !isConnected ||
+                  !isChainSupported ||
                   !canSubmit ||
                   isSubmitting ||
                   isLoading ||

@@ -26,12 +26,8 @@ export const TradingView = memo(() => {
       container: chartContainerRef.current,
       library_path: "/static/charting_library/",
       locale: "en",
-      overrides: {
-        "linetoolghostfeed.candleStyle.downColor": "#CD2B31",
-        "linetoolghostfeed.candleStyle.upColor": "#99D52A",
-      },
       disabled_features: [
-        "volume_force_overlay",
+        // "volume_force_overlay",
         "use_localstorage_for_settings",
         "adaptive_logo",
         "charting_library_debug_mode",
@@ -50,9 +46,11 @@ export const TradingView = memo(() => {
       theme: "dark",
       custom_font_family: "Giest",
       debug: false,
+      custom_css_url: "/static/tradingview.css",
       time_scale: {
         min_bar_spacing: 30,
       },
+      toolbar_bg: "#0D0D0D",
       loading_screen: {
         backgroundColor: "#0D0D0D",
         foregroundColor: "#fff",
@@ -64,48 +62,6 @@ export const TradingView = memo(() => {
 
     tvWidget.applyOverrides({
       "mainSeriesProperties.visible": true,
-      // candle
-      "mainSeriesProperties.candleStyle.downColor": "#CD2B31",
-      "mainSeriesProperties.candleStyle.upColor": "#99D52A",
-      "mainSeriesProperties.candleStyle.wickColor": "#99D52A",
-      "mainSeriesProperties.candleStyle.wickDownColor": "#CD2B31",
-      "mainSeriesProperties.candleStyle.borderUpColor": "#99D52A",
-      "mainSeriesProperties.candleStyle.borderDownColor": "#CD2B31",
-      // hollow candles
-      "mainSeriesProperties.hollowCandleStyle.upColor": "#99D52A",
-      "mainSeriesProperties.hollowCandleStyle.downColor": "#CD2B31",
-      // bar
-      "mainSeriesProperties.barStyle.downColor": "#CD2B31",
-      "mainSeriesProperties.barStyle.upColor": "#99D52A",
-      // line
-      "mainSeriesProperties.lineStyle.color": "#FF7009",
-      // line with markers
-      "mainSeriesProperties.lineWithMarkersStyle.color": "#FF7009",
-      // columns
-      "mainSeriesProperties.columnStyle.upColor": "#99D52A",
-      "mainSeriesProperties.columnStyle.downColor": "#CD2B31",
-      // area style
-      "mainSeriesProperties.areaStyle.linecolor": "#FF7009",
-      "mainSeriesProperties.areaStyle.color1": "#FF7009", // Change the first color of the gradient
-      "mainSeriesProperties.areaStyle.color2": "#FF7009",
-      // stepLine
-      // HLC
-      "mainSeriesProperties.hlcAreaStyle.highLineColor": "#FF7009",
-      "mainSeriesProperties.hlcAreaStyle.closeLineColor": "#FF7009",
-      // base lint
-      "mainSeriesProperties.baselineStyle.topLineColor": "#99D52A",
-      "mainSeriesProperties.baselineStyle.bottomLineColor": "#CD2B31",
-      // heikin aishi
-      "mainSeriesProperties.haStyle.downColor": "#CD2B31",
-      "mainSeriesProperties.haStyle.upColor": "#99D52A",
-      "mainSeriesProperties.haStyle.wickColor": "#99D52A",
-      "mainSeriesProperties.haStyle.wickDownColor": "#CD2B31",
-      "mainSeriesProperties.haStyle.borderUpColor": "#99D52A",
-      "mainSeriesProperties.haStyle.borderDownColor": "#CD2B31",
-      // high low
-      "mainSeriesProperties.hiloStyle.color": "#FF7009",
-      "mainSeriesProperties.hiloStyle.labelColor": "#FF7009",
-      "mainSeriesProperties.hiloStyle.borderColor": "#FF7009",
       // Panel
       "paneProperties.background": "#0D0D0D",
       "paneProperties.backgroundType": "solid",

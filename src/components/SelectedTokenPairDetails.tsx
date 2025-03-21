@@ -19,6 +19,7 @@ export default function SelectedTokenPairDetails() {
     isLoading,
     error,
   } = useIvData(optionMarketAddress, selectedDurationIv);
+
   const selectedDurationIvData = ivData?.ivUpdates.map((iv) => ({
     timestamp: iv.timestamp,
     value: iv.ttlIV.find((iv) =>
@@ -64,7 +65,7 @@ export default function SelectedTokenPairDetails() {
             <span className="">{selectedDurationIv}</span>
             <div className="w-[200px] h-[38px]">
               {error ? null : isLoading ? (
-                <div className="ml-5 w-full h-full bg-gray-800 animate-pulse rounded-md" />
+                <div className="ml-5 w-[90%] h-full bg-gray-800 animate-pulse rounded-md" />
               ) : (
                 <LineChart data={selectedDurationIvData} />
               )}
