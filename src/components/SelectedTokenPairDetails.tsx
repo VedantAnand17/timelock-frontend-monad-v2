@@ -5,9 +5,9 @@ import { useSelectedTokenPair } from "@/providers/SelectedTokenPairProvider";
 import Image from "next/image";
 import LineChart from "./LineChart";
 import { useMarketData } from "@/context/MarketDataProvider";
-import { formatTokenDisplayCondensed } from "@/lib/format";
 import Big from "big.js";
 import { useIvData } from "@/hooks/useIvData";
+import NumberFlow from "@number-flow/react";
 
 export default function SelectedTokenPairDetails() {
   const { selectedTokenPair } = useSelectedTokenPair();
@@ -43,12 +43,11 @@ export default function SelectedTokenPairDetails() {
         </div>
         <div className="flex flex-row items-center mt-3 gap-3">
           <span className="text-white text-[30px] font-medium">
-            {primePoolPriceData?.currentPrice
-              ? formatTokenDisplayCondensed(
-                  Big(primePoolPriceData?.currentPrice).toString(),
-                  selectedTokenPair[1].decimals
-                )
-              : "--"}
+            {primePoolPriceData?.currentPrice ? (
+              <NumberFlow value={primePoolPriceData?.currentPrice} />
+            ) : (
+              "--"
+            )}
           </span>
           <div className="px-3 py-[8px] bg-[#1A1A1A] rounded-[6px]">
             {selectedTokenPair[1].symbol}
@@ -62,7 +61,9 @@ export default function SelectedTokenPairDetails() {
         <div className="px-4 py-3 bg-[#0d0d0d] flex flex-row items-center gap-5 h-fit rounded-xl">
           <span className="text-[#616E85] text-xs font-medium">IV</span>
           <div className="flex flex-row items-center justify-between gap-1">
-            <span className="">{selectedDurationIv}</span>
+            <span className="">
+              <NumberFlow value={Number(selectedDurationIv)} />
+            </span>
             <div className="w-[200px] h-[38px]">
               {error ? null : isLoading ? (
                 <div className="ml-5 w-[90%] h-full bg-gray-800 animate-pulse rounded-md" />
