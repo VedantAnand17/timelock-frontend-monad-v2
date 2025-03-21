@@ -1,7 +1,7 @@
 export async function GET() {
   const symbolInfo = {
     symbol: ["WETH"],
-    description: ["Ethereum"],
+    description: [""],
     "exchange-listed": "",
     "exchange-traded": "",
     minmovement: 1,
