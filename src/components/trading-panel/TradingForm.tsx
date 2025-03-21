@@ -69,6 +69,13 @@ export default function TradingForm({ isLong }: { isLong: boolean }) {
 
   const amount = useStore(form.store, (state) => state.values.amount);
   const scaledAmount = parseUnits(amount, selectedTokenPair[0].decimals);
+  const amountInPutAsset =
+    primePoolPriceData?.currentPrice && amount
+      ? Big(amount).mul(Big(primePoolPriceData.currentPrice))
+      : null;
+  const scaledAmountInPutAsset = amountInPutAsset
+    ? parseUnits(amountInPutAsset.toString(), selectedTokenPair[1].decimals)
+    : null;
 
   const { data: balanceData, isLoading: isBalanceLoading } = useBalance({
     address: address,
@@ -78,18 +85,26 @@ export default function TradingForm({ isLong }: { isLong: boolean }) {
     },
   });
 
+  const args = [
+    optionMarketAddress,
+    LIQUIDITY_HANDLER_ADDRESS_USDC,
+    isLong,
+    isMax
+      ? isLong
+        ? BigInt("100000000000000000000")
+        : BigInt("200000000000")
+      : isLong
+      ? scaledAmount
+      : scaledAmountInPutAsset,
+    ttlIV[selectedDurationIndex].ttl,
+    isMax ? balanceData?.value : 0,
+  ];
+
   const { data, isError, isLoading } = useReadContract({
     address: TRADE_PREVIEW_ADDRESS,
     abi: TRADE_PREVIEW_ABI,
     functionName: "previewTrade",
-    args: [
-      optionMarketAddress,
-      LIQUIDITY_HANDLER_ADDRESS_USDC,
-      isLong,
-      isMax ? BigInt("100000000000000000000") : scaledAmount,
-      ttlIV[selectedDurationIndex].ttl,
-      isMax ? balanceData?.value : 0,
-    ],
+    args,
     query: {
       enabled: isMax
         ? true
@@ -125,12 +140,13 @@ export default function TradingForm({ isLong }: { isLong: boolean }) {
 
     const totalAmount = formatUnits(
       tradeData.steps[0].amount,
-      selectedTokenPair[0].decimals
+      isLong ? selectedTokenPair[0].decimals : selectedTokenPair[1].decimals
     );
 
-    const costInUSDC = Big(totalAmount).mul(
-      Big(primePoolPriceData.currentPrice)
-    );
+    const costInUSDC = isLong
+      ? Big(totalAmount).mul(Big(primePoolPriceData.currentPrice))
+      : Big(totalAmount);
+
     const totalCostInUSDC = formatUnits(
       totalCost,
       selectedTokenPair[1].decimals

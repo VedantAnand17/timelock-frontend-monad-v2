@@ -1,4 +1,4 @@
-import { createColumnHelper } from "@tanstack/react-table";
+import { CellContext, createColumnHelper } from "@tanstack/react-table";
 import { LongIcon } from "@/icons";
 import { ShortIcon } from "@/icons";
 import Image from "next/image";
@@ -88,42 +88,7 @@ const columns = [
   }),
   columnHelper.accessor("value", {
     header: "PnL",
-    cell: (info) => {
-      const value = info.getValue();
-      const decimals =
-        allTokens[info.row.original.putAsset.toLowerCase() as `0x${string}`]
-          .decimals;
-      return (
-        <div className="flex flex-row items-center gap-1 text-[13px]">
-          {Big(value).lte(0) ? (
-            <div className="flex flex-row items-center gap-2">
-              <span className="line-through text-white/[0.5]">
-                {formatTokenDisplayCondensed(
-                  formatUnits(BigInt(value), decimals),
-                  decimals
-                )}{" "}
-              </span>
-              <span className="">0 USDC</span>
-              <span className="underline text-white/[0.5] underline-offset-2 cursor-pointer">
-                How?
-              </span>
-            </div>
-          ) : (
-            <span className="text-[#19DE92]">
-              {formatTokenDisplayCondensed(
-                formatUnits(BigInt(value), decimals),
-                decimals
-              )}{" "}
-              {
-                allTokens[
-                  info.row.original.putAsset.toLowerCase() as `0x${string}`
-                ].symbol
-              }
-            </span>
-          )}
-        </div>
-      );
-    },
+    cell: (info) => <PnLCell info={info} />,
   }),
   columnHelper.accessor("paid", {
     header: "You Paid",
@@ -194,6 +159,52 @@ const columns = [
     ),
   }),
 ];
+
+const PnLCell = ({ info }: { info: CellContext<Position, string> }) => {
+  const { primePoolPriceData } = useMarketData();
+  const value = info.getValue();
+  const isCall = info.row.original.isCall;
+  const putAsset =
+    allTokens[info.row.original.putAsset.toLowerCase() as `0x${string}`];
+  const callAsset =
+    allTokens[info.row.original.callAsset.toLowerCase() as `0x${string}`];
+
+  const pnl = isCall
+    ? formatTokenDisplayCondensed(
+        formatUnits(BigInt(value), putAsset.decimals),
+        putAsset.decimals
+      )
+    : primePoolPriceData?.currentPrice
+    ? formatTokenDisplayCondensed(
+        Big(formatUnits(BigInt(value), callAsset.decimals))
+          .mul(Big(primePoolPriceData.currentPrice))
+          .toString(),
+        putAsset.decimals
+      )
+    : null;
+
+  return (
+    <div className="flex flex-row items-center gap-1 text-[13px]">
+      {Big(value).lte(0) ? (
+        <div className="flex flex-row items-center gap-2">
+          <span className="line-through text-white/[0.5]">{pnl ?? "--"} </span>
+          <span className="">0 USDC</span>
+          <span className="underline text-white/[0.5] underline-offset-2 cursor-pointer">
+            How?
+          </span>
+        </div>
+      ) : (
+        <span className="text-[#19DE92]">
+          {pnl}{" "}
+          {
+            allTokens[info.row.original.putAsset.toLowerCase() as `0x${string}`]
+              .symbol
+          }
+        </span>
+      )}
+    </div>
+  );
+};
 
 const CloseCell = ({
   optionId,
