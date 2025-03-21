@@ -6,6 +6,7 @@ import TradingPanel from "@/components/trading-panel/TradingPanel";
 import Graph from "@/components/graph";
 import { getMarketIvData, getPriceData } from "@/lib/api";
 import { MarketDataProvider } from "@/context/MarketDataProvider";
+import FaucetButton from "@/components/FaucetButton";
 
 export default async function Home() {
   const [market, priceData] = await Promise.all([
@@ -25,6 +26,7 @@ export default async function Home() {
       primePoolPriceData={primePoolPriceData}
     >
       <main style={{ fontFamily: "var(--font-ibm)" }}>
+        <FaucetButton />
         <Navbar />
         <div className=" max-w-[1440px] flex flex-row mx-auto border-t border-t-[#1A1A1A]">
           <div
