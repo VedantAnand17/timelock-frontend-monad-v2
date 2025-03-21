@@ -48,7 +48,7 @@ export default function Navbar() {
             </Link>
           ))}
         </ul>
-        <div className="flex flex-row items-center gap-2">
+        <div className="flex flex-row items-center gap-2 w-[420px] justify-end">
           <ChainStatus />
           <ConnectButton />
         </div>
