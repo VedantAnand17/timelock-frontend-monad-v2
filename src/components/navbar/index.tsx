@@ -1,9 +1,11 @@
 "use client";
+
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import ConnectButton from "./ConnectButton";
 import ChainStatus from "./ChainStatus";
+import FaucetButton from "./FaucetButton";
 
 const NAV_LINKS = [
   {
@@ -48,7 +50,12 @@ export default function Navbar() {
             </Link>
           ))}
         </ul>
-        <div className="flex flex-row items-center gap-2 w-[420px] justify-end">
+        <div
+          className={cn(
+            "flex flex-row items-center gap-2 w-[480px] justify-end"
+          )}
+        >
+          <FaucetButton />
           <ChainStatus />
           <ConnectButton />
         </div>

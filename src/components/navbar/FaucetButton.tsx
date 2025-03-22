@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { FaucetIcon } from "@/icons";
 import { useAccount } from "wagmi";
+import { cn } from "@/lib/utils";
+import { useState } from "react";
 import { toast } from "sonner";
 
-export default function FaucetButton() {
+const FaucetButton = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const { address } = useAccount();
+  const { address, isConnected } = useAccount();
 
   const handleClick = async () => {
     if (!address) {
@@ -42,12 +44,22 @@ export default function FaucetButton() {
   };
 
   return (
-    <button
-      onClick={handleClick}
-      disabled={isLoading || !address}
-      className="absolute right-10 bottom-10 px-4 py-2 bg-gray-800 text-white rounded-md hover:bg-gray-700 active:bg-gray-600 transition-colors shadow-lg shadow-black/25 disabled:opacity-50 disabled:cursor-not-allowed"
-    >
-      {isLoading ? "Minting..." : "Faucet"}
-    </button>
+    isConnected && (
+      <button
+        className={cn(
+          "text-sm font-medium px-3 py-3 rounded-full bg-[#131313]",
+          "cursor-pointer hover:bg-[#1a1a1a] disabled:opacity-50 disabled:cursor-not-allowed"
+        )}
+        disabled={isLoading || !address}
+        onClick={handleClick}
+      >
+        <div className="flex flex-row items-center gap-2">
+          <FaucetIcon />
+          {isLoading ? "Minting..." : "Mint"}
+        </div>
+      </button>
+    )
   );
-}
+};
+
+export default FaucetButton;
