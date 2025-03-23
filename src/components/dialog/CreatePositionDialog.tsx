@@ -94,10 +94,10 @@ export function CreatePositionDialog({
           >
             Confirm
           </button>
-          <div className="text-[11px] text-[#616E85] text-center max-w-[200px] flex items-center justify-center mx-auto">
+          {/* <div className="text-[11px] text-[#616E85] text-center max-w-[200px] flex items-center justify-center mx-auto">
             Trades on Timelock do not go into loss if the price of{" "}
             {callAsset.symbol} goes down
-          </div>
+          </div> */}
         </DialogFooter>
       </DialogContent>
     </Dialog>

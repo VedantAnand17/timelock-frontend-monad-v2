@@ -374,8 +374,9 @@ export default function TradingForm({ isLong }: { isLong: boolean }) {
             </>
           )}
         </form.Subscribe>
-        <div className="text-xs pt-3 text-center text-[#9CA3AF]">
-          You don&apos;t pay for losses on Timelock <u>How</u>?
+        <div className="text-xs pt-3 max-w-sm text-center text-[#9CA3AF]">
+          The premium you pay on timelock is used to protect your trade from
+          liquidations even if the asset price goes to 0.
         </div>
       </form>
     </>
