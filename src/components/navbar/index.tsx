@@ -52,7 +52,7 @@ export default function Navbar() {
         </ul>
         <div
           className={cn(
-            "flex flex-row items-center gap-2 w-[480px] justify-end"
+            "flex flex-row items-center gap-2 w-[520px] justify-end"
           )}
         >
           <FaucetButton />

@@ -18,6 +18,7 @@ const ConnectButton = () => {
     token: USDC.address as `0x${string}`,
     query: {
       enabled: isConnected && !!address,
+      refetchInterval: 3000,
     },
   });
 

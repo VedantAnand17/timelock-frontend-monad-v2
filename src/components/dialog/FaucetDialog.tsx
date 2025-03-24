@@ -7,6 +7,9 @@ import {
 import { Dispatch, SetStateAction } from "react";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import { useAccount } from "wagmi";
+import { useModal } from "connectkit";
+import { X } from "lucide-react";
 
 export function FaucetDialog({
   isOpen,
@@ -19,9 +22,24 @@ export function FaucetDialog({
   onMint: () => void;
   isLoading: boolean;
 }) {
+  const { isConnected } = useAccount();
+  const { setOpen } = useModal();
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="!max-w-[450px] !p-0">
+      <DialogContent
+        className="!max-w-[450px] !p-0"
+        onInteractOutside={(e) => {
+          e.preventDefault();
+        }}
+      >
+        <button
+          onClick={() => setIsOpen(false)}
+          className="absolute cursor-pointer right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none disabled:pointer-events-none"
+        >
+          <X className="h-5 w-5" />
+          <span className="sr-only">Close</span>
+        </button>
         <DialogTitle className="sr-only">Timelock Faucet</DialogTitle>
         <div className="flex flex-col items-center">
           <Image
@@ -62,9 +80,19 @@ export function FaucetDialog({
               "disabled:opacity-50 disabled:cursor-not-allowed"
             )}
             disabled={isLoading}
-            onClick={onMint}
+            onClick={() => {
+              if (isConnected) {
+                onMint();
+              } else {
+                setOpen(true);
+              }
+            }}
           >
-            {isLoading ? "Minting..." : "Mint"}
+            {isConnected
+              ? isLoading
+                ? "Minting..."
+                : "Mint"
+              : "Connect Wallet"}
           </button>
         </DialogFooter>
       </DialogContent>

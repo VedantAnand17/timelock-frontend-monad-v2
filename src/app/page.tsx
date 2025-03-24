@@ -12,7 +12,7 @@ export default async function Home() {
     getMarketIvData(),
     getPriceData(),
   ]);
-  const ttlIV = market.market.ttlIV;
+  const ttlIV = [...market.market.ttlIV].sort((a, b) => a.ttl - b.ttl);
   const primePoolPriceData = priceData.find(
     (price) => price.poolAddress === market.market.primePool
   );

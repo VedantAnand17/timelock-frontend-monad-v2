@@ -26,6 +26,7 @@ import { toast } from "sonner";
 import { CreatePositionDialog } from "../dialog/CreatePositionDialog";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { virtualBase } from "@/lib/chains";
+import { useModal } from "connectkit";
 
 interface TradePreviewStep {
   amount: bigint;
@@ -51,6 +52,7 @@ export default function TradingForm({ isLong }: { isLong: boolean }) {
   const { selectedTokenPair } = useSelectedTokenPair();
   const { skipOrderConfirmation } = useSettingsStore();
   const { address, isConnected, chainId } = useAccount();
+  const { setOpen } = useModal();
   const isChainSupported = chainId === virtualBase.chainId;
   const {
     ttlIV,
@@ -270,6 +272,11 @@ export default function TradingForm({ isLong }: { isLong: boolean }) {
           e.preventDefault();
           e.stopPropagation();
           form.handleSubmit();
+          if (!isConnected) {
+            setOpen(true);
+            return;
+          }
+
           if (skipOrderConfirmation) {
             executeTrade();
           } else {
@@ -334,49 +341,50 @@ export default function TradingForm({ isLong }: { isLong: boolean }) {
         <form.Subscribe
           selector={(state) => [state.canSubmit, state.isSubmitting]}
         >
-          {([canSubmit, isSubmitting]) => (
-            <>
-              <button
-                className={cn(
-                  "w-full disabled:opacity-50 cursor-pointer bg-[#19DE92] text-[#0D0D0D] font-medium text-base rounded-[12px] py-3",
-                  isLong ? "bg-[#19DE92]" : "bg-[#EC5058]"
-                )}
-                disabled={
-                  !isConnected ||
-                  !isChainSupported ||
-                  !canSubmit ||
-                  isSubmitting ||
-                  isLoading ||
-                  isError ||
-                  isPending
-                }
-              >
-                {isLong
-                  ? "Long " + selectedTokenPair[0].symbol
-                  : "Short " + selectedTokenPair[0].symbol}
-              </button>
-              <CreatePositionDialog
-                positionSize={amount}
-                leverage={leverageValue}
-                youPay={totalCost}
-                premiumCost={premiumCost}
-                duration={formatDuration(ttlIV[selectedDurationIndex].ttl)}
-                callAsset={selectedTokenPair[0]}
-                putAsset={selectedTokenPair[1]}
-                isLong={isLong}
-                isOpen={isOpenCreatePositionDialog}
-                setIsOpen={setIsOpenCreatePositionDialog}
-                onSubmit={executeTrade}
-                disabled={
-                  !canSubmit ||
-                  isSubmitting ||
-                  isLoading ||
-                  isError ||
-                  isPending
-                }
-              />
-            </>
-          )}
+          {([canSubmit, isSubmitting]) => {
+            return (
+              <>
+                <button
+                  className={cn(
+                    "w-full disabled:opacity-50 cursor-pointer bg-[#19DE92] text-[#0D0D0D] font-medium text-base rounded-[12px] py-3",
+                    isLong ? "bg-[#19DE92]" : "bg-[#EC5058]"
+                  )}
+                  disabled={
+                    (isConnected && !canSubmit) ||
+                    (isConnected && !isChainSupported) ||
+                    isSubmitting ||
+                    isLoading ||
+                    isError ||
+                    isPending
+                  }
+                >
+                  {isLong
+                    ? "Long " + selectedTokenPair[0].symbol
+                    : "Short " + selectedTokenPair[0].symbol}
+                </button>
+                <CreatePositionDialog
+                  positionSize={amount}
+                  leverage={leverageValue}
+                  youPay={totalCost}
+                  premiumCost={premiumCost}
+                  duration={formatDuration(ttlIV[selectedDurationIndex].ttl)}
+                  callAsset={selectedTokenPair[0]}
+                  putAsset={selectedTokenPair[1]}
+                  isLong={isLong}
+                  isOpen={isOpenCreatePositionDialog}
+                  setIsOpen={setIsOpenCreatePositionDialog}
+                  onSubmit={executeTrade}
+                  disabled={
+                    !canSubmit ||
+                    isSubmitting ||
+                    isLoading ||
+                    isError ||
+                    isPending
+                  }
+                />
+              </>
+            );
+          }}
         </form.Subscribe>
         <div className="text-xs pt-3 max-w-sm text-center text-[#9CA3AF]">
           The premium you pay on timelock is used to protect your trade from

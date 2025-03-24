@@ -15,7 +15,9 @@ export default function Tables() {
   const { data: positions, isLoading, error } = usePositionsTableData();
   const { isConnected } = useAccount();
 
-  const positionsData = positions?.positions;
+  const positionsData = positions?.positions?.sort(
+    (a, b) => b.createdAt - a.createdAt
+  );
 
   const table = useReactTable({
     data: useMemo(() => {

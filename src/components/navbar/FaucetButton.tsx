@@ -10,7 +10,7 @@ import { FaucetDialog } from "@/components/dialog/FaucetDialog";
 const FaucetButton = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const { address, isConnected } = useAccount();
+  const { address } = useAccount();
 
   const handleMint = async () => {
     if (!address) {
@@ -47,38 +47,31 @@ const FaucetButton = () => {
   };
 
   const handleButtonClick = () => {
-    if (!address) {
-      toast.error("Please connect your wallet first");
-      return;
-    }
     setIsDialogOpen(true);
   };
 
   return (
-    isConnected && (
-      <>
-        <button
-          className={cn(
-            "text-sm font-medium px-3 py-3 rounded-full bg-[#131313]",
-            "cursor-pointer hover:bg-[#1a1a1a] disabled:opacity-50 disabled:cursor-not-allowed"
-          )}
-          disabled={!address}
-          onClick={handleButtonClick}
-        >
-          <div className="flex flex-row items-center gap-2">
-            <FaucetIcon />
-            Mint
-          </div>
-        </button>
+    <>
+      <button
+        className={cn(
+          "text-sm font-medium px-3 py-3 rounded-full bg-[#131313]",
+          "cursor-pointer hover:bg-[#1a1a1a] disabled:opacity-50 disabled:cursor-not-allowed"
+        )}
+        onClick={handleButtonClick}
+      >
+        <div className="flex flex-row items-center gap-2">
+          <FaucetIcon />
+          Mint
+        </div>
+      </button>
 
-        <FaucetDialog
-          isOpen={isDialogOpen}
-          setIsOpen={setIsDialogOpen}
-          onMint={handleMint}
-          isLoading={isLoading}
-        />
-      </>
-    )
+      <FaucetDialog
+        isOpen={isDialogOpen}
+        setIsOpen={setIsDialogOpen}
+        onMint={handleMint}
+        isLoading={isLoading}
+      />
+    </>
   );
 };
 
