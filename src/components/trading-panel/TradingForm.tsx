@@ -1,6 +1,6 @@
 import { useSelectedTokenPair } from "@/providers/SelectedTokenPairProvider";
 import Input from "@/components/trading-panel/Input";
-import { BlueStrokeIcon, FlashIcon, TradeTypeStrokeIcon } from "@/icons";
+import { FlashIcon } from "@/icons";
 import DurationSelector from "./DurationSelector";
 import TradeExecutionDetails from "./TradeExecutionDetails";
 import { cn } from "@/lib/utils";
@@ -276,10 +276,10 @@ export default function TradingForm({ isLong }: { isLong: boolean }) {
         }}
         className="relative"
       >
-        <TradeTypeStrokeIcon
+        {/* <TradeTypeStrokeIcon
           isLong={isLong}
           className="absolute top-[10px] -left-[18px]"
-        />
+        /> */}
         <div className="text-sm font-medium pb-3">
           {isLong ? "You Long" : "You Short"}
         </div>
@@ -304,7 +304,7 @@ export default function TradingForm({ isLong }: { isLong: boolean }) {
           </span>
         </div>
         <div className="text-sm font-medium pb-3">For</div>
-        <BlueStrokeIcon className="absolute bottom-[96px] -left-[20px]" />
+        {/* <BlueStrokeIcon className="absolute bottom-[96px] -left-[20px]" /> */}
         <DurationSelector
           durations={durations}
           selectedDurationIndex={selectedDurationIndex}
