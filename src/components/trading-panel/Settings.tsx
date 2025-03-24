@@ -57,7 +57,7 @@ export const SettingsPopoverContent = () => {
                   e.preventDefault();
                 }
               }}
-              className="bg-transparent outline-none text-white text-sm font-medium w-[50px] text-right"
+              className="bg-transparent outline-none text-white text-sm font-medium w-[50px] text-right selection:bg-transparent"
             />
             <span className="text-sm text-[#9CA3AF]">%</span>
           </div>

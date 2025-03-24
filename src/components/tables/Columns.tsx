@@ -147,15 +147,17 @@ const columns = [
   columnHelper.display({
     id: "actions",
     cell: (info) => (
-      <CloseCell
-        disabled={Big(info.row.original.value).lte(0)}
-        optionId={info.row.original.exerciseParams.optionId}
-        swapper={info.row.original.exerciseParams.swapper}
-        swapData={info.row.original.exerciseParams.swapData}
-        liquidityToExercise={
-          info.row.original.exerciseParams.liquidityToExercise
-        }
-      />
+      <div className="pr-4">
+        <CloseCell
+          disabled={Big(info.row.original.value).lte(0)}
+          optionId={info.row.original.exerciseParams.optionId}
+          swapper={info.row.original.exerciseParams.swapper}
+          swapData={info.row.original.exerciseParams.swapData}
+          liquidityToExercise={
+            info.row.original.exerciseParams.liquidityToExercise
+          }
+        />
+      </div>
     ),
   }),
 ];
