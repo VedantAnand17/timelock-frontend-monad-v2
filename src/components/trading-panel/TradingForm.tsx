@@ -114,7 +114,9 @@ export default function TradingForm({ isLong }: { isLong: boolean }) {
 
   const tradeData = data as TradePreviewResult;
   const premiumCost = tradeData?.premiumCost;
-  const totalCost = tradeData?.totalCost;
+  const totalCost = tradeData?.totalCost
+    ? (tradeData.totalCost * BigInt(11)) / BigInt(10)
+    : undefined;
   const protocolFee = tradeData?.protocolFee;
   const amountFromPreview = tradeData?.steps[0].amount;
 
@@ -181,9 +183,10 @@ export default function TradingForm({ isLong }: { isLong: boolean }) {
 
   useEffect(() => {
     if (executedTradeData?.status === "success") {
+      form.setFieldValue("amount", "");
       toast.success("Trade Placed");
     }
-  }, [executedTradeData]);
+  }, [executedTradeData, form]);
 
   useEffect(() => {
     if (approvalError) {
@@ -214,7 +217,8 @@ export default function TradingForm({ isLong }: { isLong: boolean }) {
       !tradeData ||
       !tradeData.steps ||
       tradeData.steps.length === 0 ||
-      allowance === undefined
+      allowance === undefined ||
+      !totalCost
     )
       return;
 
