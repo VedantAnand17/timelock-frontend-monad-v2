@@ -6,14 +6,17 @@ import { WagmiProvider, createConfig, http } from "wagmi";
 import { Toaster } from "sonner";
 import { virtualBase } from "@/lib/chains";
 import { RPC_URL } from "@/lib/rpcs";
+import { monad } from "@/lib/chains";
+import { MONAD_RPC_URL } from "@/lib/rpcs";
 import { SelectedTokenPairProvider } from "./SelectedTokenPairProvider";
 import { ErrorIcon, SuccessIcon } from "@/icons";
 
 const config = createConfig(
   getDefaultConfig({
-    chains: [virtualBase],
+    chains: [monad],
     transports: {
       [virtualBase.id]: http(RPC_URL),
+      [monad.id]: http(process.env.NEXT_PUBLIC_RPC_URL),
     },
     // TODO: Create env and set this
     walletConnectProjectId:

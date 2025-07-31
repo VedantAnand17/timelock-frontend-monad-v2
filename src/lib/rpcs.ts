@@ -1,2 +1,2 @@
-export const RPC_URL =
-  "https://virtual.base.rpc.tenderly.co/f8ef1da1-ff2b-491a-95d0-d44b1c5ebb81";
+export const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL;
+export const MONAD_RPC_URL = process.env.NEXT_PUBLIC_MONAD_RPC_URL;

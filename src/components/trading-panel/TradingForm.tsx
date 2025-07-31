@@ -6,7 +6,6 @@ import TradeExecutionDetails from "./TradeExecutionDetails";
 import { cn } from "@/lib/utils";
 import { useForm, useStore } from "@tanstack/react-form";
 import { useMarketData } from "@/context/MarketDataProvider";
-import { LIQUIDITY_HANDLER_ADDRESS_USDC } from "@/lib/contracts";
 import {
   useAccount,
   useBalance,
@@ -14,7 +13,7 @@ import {
   useWaitForTransactionReceipt,
   useWriteContract,
 } from "wagmi";
-import { TRADE_PREVIEW_ADDRESS } from "@/lib/contracts";
+import { contracts } from "@/lib/contracts";
 import { TRADE_PREVIEW_ABI } from "@/lib/abis/tradePreviewAbi";
 import { formatUnits, parseUnits, erc20Abi } from "viem";
 import { Big } from "big.js";
@@ -89,7 +88,7 @@ export default function TradingForm({ isLong }: { isLong: boolean }) {
 
   const args = [
     optionMarketAddress,
-    LIQUIDITY_HANDLER_ADDRESS_USDC,
+    contracts[10143].LIQUIDITY_HANDLER_ADDRESS_USDC,
     isLong,
     isMax
       ? isLong
@@ -103,7 +102,7 @@ export default function TradingForm({ isLong }: { isLong: boolean }) {
   ];
 
   const { data, isError, isLoading } = useReadContract({
-    address: TRADE_PREVIEW_ADDRESS,
+    address: contracts[10143].TRADE_PREVIEW_ADDRESS as `0x${string}`,
     abi: TRADE_PREVIEW_ABI,
     functionName: "previewTrade",
     args,
@@ -234,7 +233,7 @@ export default function TradingForm({ isLong }: { isLong: boolean }) {
     }
 
     const optionTicks = {
-      _handler: LIQUIDITY_HANDLER_ADDRESS_USDC,
+      _handler: contracts[10143].LIQUIDITY_HANDLER_ADDRESS_USDC,
       pool: primePool,
       hook: "0x0000000000000000000000000000000000000000",
       tickLower: tradeData.steps[0].tickLower,

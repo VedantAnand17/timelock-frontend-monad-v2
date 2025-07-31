@@ -1,5 +1,8 @@
-export const TRADE_PREVIEW_ADDRESS =
-  "0x326880Dc987889211fcAE0e33aB4fD73dD5fb859";
+import { virtualBase, monad } from "./chains";
 
-export const LIQUIDITY_HANDLER_ADDRESS_USDC =
-  "0xa1a46bde565a7f083c8d0a596e8a4fcd5571e9a6";
+export const contracts = {
+  [monad.id]: {
+    TRADE_PREVIEW_ADDRESS: "0x948bb501CD7894fC62a98b763d31425eE18041F5", 
+    LIQUIDITY_HANDLER_ADDRESS_USDC: "0x3D2B3BaCCb4C7450B545D291a183AE4011D92A4f", 
+  },
+};

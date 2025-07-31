@@ -1,5 +1,6 @@
 "use client";
 import { memo, useEffect, useRef } from "react";
+import { useSelectedTokenPair } from "@/providers/SelectedTokenPairProvider";
 
 import {
   ChartingLibraryWidgetOptions,
@@ -8,12 +9,13 @@ import {
 } from "../../../public/static/charting_library";
 
 export const TradingView = memo(() => {
+  const { selectedTokenPair } = useSelectedTokenPair();
   const chartContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!window || !chartContainerRef.current) return;
     const widgetOptions: ChartingLibraryWidgetOptions = {
-      symbol: "WETH",
+      symbol: selectedTokenPair[0].symbol,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       datafeed: new (window as any).Datafeeds.UDFCompatibleDatafeed(
         "/api",
@@ -72,7 +74,7 @@ export const TradingView = memo(() => {
     return () => {
       tvWidget.remove();
     };
-  }, []);
+  }, [selectedTokenPair]);
 
   return <div ref={chartContainerRef} className="h-full w-full" />;
 });

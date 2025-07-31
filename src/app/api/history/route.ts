@@ -23,13 +23,17 @@ export async function GET(request: Request) {
     const resolution = searchParams.get("resolution");
     const symbol = searchParams.get("symbol");
 
-    const timeframe = TIMEFRAME_MAP[resolution as keyof typeof TIMEFRAME_MAP];
-
     if (!resolution || !symbol) {
       return new Response(`Pass resolution and symbol`, {
         status: 400,
       });
     }
+
+    if (symbol !== "WBTC") {
+      return NextResponse.json({ s: "no_data" });
+    }
+
+    const timeframe = TIMEFRAME_MAP[resolution as keyof typeof TIMEFRAME_MAP];
 
     if (!timeframe) {
       return NextResponse.json(
