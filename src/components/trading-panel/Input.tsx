@@ -25,65 +25,57 @@ const Input = ({
   }, []);
 
   return (
-    <div className="p-[12px_10px_12px_16px] flex gap-1 flex-row rounded-xl border border-[#282324] bg-[#1a1a1a80]">
-      <div className="flex flex-col gap-0 grow-1">
-        <input
-          type="number"
-          ref={inputRef}
-          autoComplete="off"
-          placeholder="0"
-          id={field.name}
-          name={field.name}
-          value={field.state.value}
-          onChange={(e) => {
-            if (setIsMax) {
-              setIsMax(false);
-            }
-            field.handleChange(e.target.value);
-          }}
-          onWheel={(e) => e.preventDefault()}
-          onPaste={preventPasteNegative}
-          min={0.0}
-          step="any"
-          onKeyDown={(e) => {
-            preventMinusAndEKey(e);
-            if (e.key === "ArrowDown") {
-              e.preventDefault();
-            }
-          }}
-          className="bg-transparent max-w-[136px] outline-none text-white text-[24px] font-medium"
-        />
-        <div className="text-[#9CA3AF] text-xs font-medium max-w-[106px] whitespace-nowrap overflow-scroll">
-          {primePoolPriceData?.currentPrice && field.state.value
-            ? formatTokenDisplayCondensed(
-                Big(primePoolPriceData?.currentPrice)
-                  .mul(Big(field.state.value))
-                  .toString(),
-                selectedTokenPair[1].decimals
-              )
-            : "--"}{" "}
-          {selectedTokenPair[1].symbol}
-        </div>
-      </div>
-      <div className="flex flex-row gap-2 items-start">
-        <div className="flex items-center gap-[6px] text-sm justify-center rounded-md bg-[#0D0D0D] h-[36px] px-[12px]">
-          <Image
-            src={selectedTokenPair[0].image}
-            alt={selectedTokenPair[0].symbol}
-            width={16}
-            height={16}
+    <div className="mb-4">
+      <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-4 flex items-center justify-between">
+        <div className="flex-1">
+          <input
+            type="number"
+            ref={inputRef}
+            autoComplete="off"
+            placeholder="0"
+            id={field.name}
+            name={field.name}
+            value={field.state.value}
+            onChange={(e) => {
+              if (setIsMax) {
+                setIsMax(false);
+              }
+              field.handleChange(e.target.value);
+            }}
+            onWheel={(e) => e.preventDefault()}
+            onPaste={preventPasteNegative}
+            min={0.0}
+            step="any"
+            onKeyDown={(e) => {
+              preventMinusAndEKey(e);
+              if (e.key === "ArrowDown") {
+                e.preventDefault();
+              }
+            }}
+            className="bg-transparent w-full outline-none text-white text-2xl font-semibold placeholder-[#9CA3AF]"
           />
-          {selectedTokenPair[0].symbol}
         </div>
-        <button
-          type="button"
-          className="text-sm font-medium mt-2 cursor-pointer"
-          onClick={() => {
-            setIsMax(true);
-          }}
-        >
-          MAX
-        </button>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 bg-[#0D0D0D] px-3 py-2 rounded-lg">
+            <Image
+              src={selectedTokenPair[0].image}
+              alt={selectedTokenPair[0].symbol}
+              width={16}
+              height={16}
+              className="rounded-full"
+            />
+            <span className="text-white font-medium">{selectedTokenPair[0].symbol}</span>
+          </div>
+          <button
+            type="button"
+            className="text-[#19DE92] font-semibold text-sm hover:text-[#15B77E] transition-colors"
+            onClick={() => {
+              setIsMax(true);
+            }}
+          >
+            MAX
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -8,6 +8,7 @@ import { formatTokenDisplayCondensed } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { useSelectedTokenPair } from "@/providers/SelectedTokenPairProvider";
 import { formatUnits } from "viem";
+import { ChevronDown } from "@/icons";
 
 export default function TradeExecutionDetails({
   premiumCost,
@@ -17,47 +18,44 @@ export default function TradeExecutionDetails({
   protocolFee: bigint;
 }) {
   return (
-    <Accordion type="single" collapsible className="min-h-[164px]">
-      <AccordionItem value="item-1">
-        <AccordionTrigger className="cursor-pointer text-[#9CA3AF] text-sm font-medium border border-[#282324] rounded-md px-4 bg-[#1a1a1a80]">
-          Show Details
-        </AccordionTrigger>
-        <AccordionContent className="px-4">
-          <TradeExecutionDetailsItem
-            title="Premium"
-            value={premiumCost}
-            className="pt-3 pb-[10px]"
-          />
-          <TradeExecutionDetailsItem
-            title="Protocol Fees"
-            value={protocolFee}
-            className="pb-[10px]"
-          />
-          <div className="w-full mt-5 h-[1px] bg-[#282324]"></div>
-        </AccordionContent>
-      </AccordionItem>
-    </Accordion>
+    <div className="mb-6">
+      <Accordion type="single" collapsible className="w-full">
+        <AccordionItem value="item-1" className="border-none">
+          <AccordionTrigger className="cursor-pointer text-[#9CA3AF] text-sm font-medium hover:no-underline p-0 [&[data-state=open]>svg]:rotate-180">
+            <div className="flex items-center gap-2">
+              <span>Show Details</span>
+              <ChevronDown className="h-4 w-4 transition-transform duration-200" />
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="pt-4 pb-0">
+            <div className="space-y-3">
+              <TradeExecutionDetailsItem
+                title="Premium"
+                value={premiumCost}
+              />
+              <TradeExecutionDetailsItem
+                title="Protocol Fees"
+                value={protocolFee}
+              />
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+    </div>
   );
 }
 
 const TradeExecutionDetailsItem = ({
   title,
   value,
-  className,
 }: {
   title: string;
   value: bigint;
-  className?: string;
 }) => {
   const { selectedTokenPair } = useSelectedTokenPair();
 
   return (
-    <div
-      className={cn(
-        "flex flex-row items-center justify-between gap-2",
-        className
-      )}
-    >
+    <div className="flex flex-row items-center justify-between">
       <span className="text-[#9CA3AF] text-sm">{title}</span>
       <span className="text-white text-sm font-medium">
         {value

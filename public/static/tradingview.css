@@ -1,5 +1,163 @@
-.theme-dark:root {
-  --tv-color-platform-background: #0d0d0d;
-  --tv-color-pane-background: #0d0d0d;
-  --tv-color-pane-background-secondary: #0d0d0d;
+/* TradingView Custom Styling - Save as /public/static/tradingview.css */
+
+/* Main chart container */
+.chart-container {
+  background-color: #0D0D0D !important;
+  color: #ffffff !important;
+}
+
+/* Hide TradingView logo and branding */
+.tv-header__logo,
+.tv-header__link,
+.tv-header__brand,
+.tv-watermark,
+.tv-floating-toolbar__widget-wrapper,
+div[data-name="legend-source-item"] a {
+  display: none !important;
+}
+
+/* Chart header styling */
+.tv-header {
+  background-color: #0D0D0D !important;
+  border-bottom: 1px solid #1A1A1A !important;
+}
+
+/* Symbol info styling */
+.tv-symbol-header {
+  background-color: transparent !important;
+}
+
+.tv-symbol-header__symbol {
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  font-size: 16px !important;
+}
+
+.tv-symbol-header__details {
+  color: #9CA3AF !important;
+  font-size: 14px !important;
+}
+
+/* Price info colors */
+.tv-symbol-header__price-positive {
+  color: #19DE92 !important;
+}
+
+.tv-symbol-header__price-negative {
+  color: #EC5058 !important;
+}
+
+/* Chart toolbar */
+.tv-header__area--primary {
+  background-color: #0D0D0D !important;
+}
+
+.tv-header__area--secondary {
+  background-color: #0D0D0D !important;
+}
+
+/* Time scale (bottom axis) */
+.tv-time-axis {
+  background-color: #0D0D0D !important;
+  color: #9CA3AF !important;
+}
+
+.tv-time-axis__tick {
+  color: #9CA3AF !important;
+}
+
+/* Price scale (right axis) */
+.tv-price-axis {
+  background-color: #0D0D0D !important;
+  color: #9CA3AF !important;
+}
+
+.tv-price-axis__tick {
+  color: #9CA3AF !important;
+}
+
+/* Grid lines */
+.tv-grid {
+  color: #1A1A1A !important;
+}
+
+/* Chart background */
+.tv-chart-renderer canvas {
+  background-color: #0D0D0D !important;
+}
+
+/* Crosshair */
+.tv-crosshair {
+  color: #9CA3AF !important;
+}
+
+/* Legend */
+.tv-data-window {
+  background-color: #1A1A1A !important;
+  border: 1px solid #2A2A2A !important;
+  color: #ffffff !important;
+  border-radius: 6px !important;
+  font-size: 12px !important;
+}
+
+/* Volume indicator styling */
+.tv-legend-item__title {
+  color: #9CA3AF !important;
+}
+
+.tv-legend-item__value {
+  color: #ffffff !important;
+}
+
+/* Toolbar buttons */
+.tv-header__button {
+  background-color: transparent !important;
+  color: #9CA3AF !important;
+  border: none !important;
+}
+
+.tv-header__button:hover {
+  background-color: #1A1A1A !important;
+  color: #ffffff !important;
+}
+
+/* Remove unwanted elements */
+.tv-floating-toolbar,
+.tv-linetool-toolbar,
+.tv-chart-topbar__left,
+.tv-toast-logger,
+.tv-chart-container .tv-header__area--primary .tv-header__inner .tv-header__button[data-name="intervals"],
+.tv-chart-container .tv-header__area--primary .tv-header__inner .tv-header__button[data-name="chart-types"] {
+  display: none !important;
+}
+
+/* Custom styling for the time and volume display */
+.tv-header__area--right {
+  color: #9CA3AF !important;
+  font-size: 12px !important;
+}
+
+/* Style the percentage and log buttons to match the image */
+.tv-header__button--active {
+  color: #19DE92 !important;
+  background-color: #19DE9220 !important;
+}
+
+/* Custom candlestick colors are handled in the widget options */
+
+/* Ensure proper font family */
+* {
+  font-family: var(--font-ibm, 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif) !important;
+}
+
+/* Loading screen */
+.tv-loading-screen {
+  background-color: #0D0D0D !important;
+  color: #ffffff !important;
+}
+
+/* Price line styling */
+.tv-price-line {
+  color: #9CA3AF !important;
+  stroke-dasharray: 4, 4 !important;
 }

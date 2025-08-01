@@ -27,46 +27,58 @@ export default function SelectedTokenPairDetails() {
     )?.IV,
   }));
 
+  // Mock data for WBTC price change (replace with real data)
+  const priceChange = -8.609;
+  const priceChangePercent = -0.23;
+
   return (
-    <div className="flex flex-row justify-between">
-      <div className="bg-[#0D0D0D] p-4 rounded-xl">
-        <div className="flex flex-row items-center p-3 py-[8px] gap-[6px] bg-[#1A1A1A] rounded-xl w-fit">
+    <div className="flex flex-row justify-between items-start">
+      <div className="flex flex-row items-center gap-6">
+        <div className="flex flex-row items-center gap-3 bg-[#1A1A1A] px-3 py-2 rounded-lg">
           <Image
             src={selectedTokenPair[0].image}
             alt={selectedTokenPair[0].symbol}
             width={20}
             height={20}
+            className="rounded-full"
           />
-          <span className="font-semibold mt-[2px]">
+          <span className="text-white font-semibold text-sm">
             {selectedTokenPair[0].symbol} / {selectedTokenPair[1].symbol}
           </span>
         </div>
-        <div className="flex flex-row items-center mt-3 gap-3">
-          <span className="text-white text-[30px] font-medium">
-            {primePoolPriceData?.currentPrice ? (
-              <NumberFlow value={primePoolPriceData?.currentPrice} />
-            ) : (
-              "--"
-            )}
-          </span>
-          <div className="px-3 py-[8px] bg-[#1A1A1A] rounded-[6px]">
-            {selectedTokenPair[1].symbol}
-          </div>
+        
+        <div className="text-white text-[32px] font-semibold">
+          {primePoolPriceData?.currentPrice ? (
+            <NumberFlow 
+              value={primePoolPriceData?.currentPrice} 
+              format={{ 
+                style: 'decimal',
+                minimumFractionDigits: 3,
+                maximumFractionDigits: 3
+              }}
+            />
+          ) : (
+            "--"
+          )}
+        </div>
+        
+        <div className="text-white text-sm bg-[#1A1A1A] px-2 py-1 rounded">
+          {selectedTokenPair[1].symbol}
         </div>
       </div>
-      <div className="flex flex-row gap-4 items-end">
-        {/* TODO: Later only send numbers so neg pos can be checked  */}
-        <StatsCard title="TVL" value="$120.94M" percentage="10.50%" />
-        <StatsCard title="Volume(24H)" value="$13.4M" percentage="8.50%" />
-        <div className="px-4 py-3 bg-[#0d0d0d] flex flex-row items-center gap-5 h-fit rounded-xl">
-          <span className="text-[#616E85] text-xs font-medium">IV</span>
-          <div className="flex flex-row items-center justify-between gap-1">
-            <span className="">
+      
+      <div className="flex flex-row gap-6 items-center">
+        <StatsCard title="TVL" value="$120.94M" percentage="10.50%" positive={true} />
+        <StatsCard title="Volume(24H)" value="$13.4M" percentage="8.50%" positive={true} />
+        <div className="flex flex-row items-center gap-4 bg-[#1A1A1A] px-4 py-3 rounded-lg">
+          <span className="text-[#9CA3AF] text-sm font-medium">IV</span>
+          <div className="flex flex-row items-center gap-3">
+            <span className="text-white text-lg font-medium">
               <NumberFlow value={Number(selectedDurationIv)} />
             </span>
-            <div className="w-[200px] h-[38px]">
+            <div className="w-[120px] h-[30px]">
               {error ? null : isLoading ? (
-                <div className="ml-5 w-[90%] h-full bg-gray-800 animate-pulse rounded-md" />
+                <div className="w-full h-full bg-gray-700 animate-pulse rounded" />
               ) : (
                 <LineChart data={selectedDurationIvData} />
               )}
@@ -82,18 +94,23 @@ const StatsCard = ({
   title,
   value,
   percentage,
+  positive = true,
 }: {
   title: string;
   value: string;
   percentage: string;
+  positive?: boolean;
 }) => {
   return (
-    <div className="px-4 py-3 bg-[#0d0d0d] flex flex-col gap-2 h-fit rounded-xl">
-      <span className="text-[#616E85] text-xs font-medium">{title}</span>
-      <div className="flex flex-row items-center justify-between gap-10">
-        <span className="">{value}</span>
-        <div className="text-[#19DE92] text-xs font-semibold flex flex-row items-center">
-          <ChevronDown className="rotate-180" /> {percentage}
+    <div className="flex flex-col gap-1">
+      <span className="text-[#9CA3AF] text-sm font-medium">{title}</span>
+      <div className="flex flex-row items-center gap-2">
+        <span className="text-white font-semibold">{value}</span>
+        <div className={`text-xs font-semibold flex flex-row items-center ${
+          positive ? 'text-[#19DE92]' : 'text-[#EC5058]'
+        }`}>
+          <ChevronDown className={positive ? 'rotate-180' : ''} width={12} height={12} /> 
+          {percentage}
         </div>
       </div>
     </div>

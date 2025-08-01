@@ -24,8 +24,10 @@ import { USDC } from "@/lib/tokens";
 import { toast } from "sonner";
 import { CreatePositionDialog } from "../dialog/CreatePositionDialog";
 import { useSettingsStore } from "@/stores/settingsStore";
-import { virtualBase } from "@/lib/chains";
+import { monad } from "@/lib/chains";
 import { useModal } from "connectkit";
+
+const CHAIN_ID = 10143; // Monad testnet
 
 interface TradePreviewStep {
   amount: bigint;
@@ -52,7 +54,7 @@ export default function TradingForm({ isLong }: { isLong: boolean }) {
   const { skipOrderConfirmation } = useSettingsStore();
   const { address, isConnected, chainId } = useAccount();
   const { setOpen } = useModal();
-  const isChainSupported = chainId === virtualBase.chainId;
+  const isChainSupported = chainId === monad.id;
   const {
     ttlIV,
     selectedDurationIndex,
@@ -88,7 +90,7 @@ export default function TradingForm({ isLong }: { isLong: boolean }) {
 
   const args = [
     optionMarketAddress,
-    contracts[10143].LIQUIDITY_HANDLER_ADDRESS_USDC,
+    contracts[CHAIN_ID].LIQUIDITY_HANDLER_ADDRESS_USDC,
     isLong,
     isMax
       ? isLong
@@ -102,7 +104,7 @@ export default function TradingForm({ isLong }: { isLong: boolean }) {
   ];
 
   const { data, isError, isLoading } = useReadContract({
-    address: contracts[10143].TRADE_PREVIEW_ADDRESS as `0x${string}`,
+    address: contracts[CHAIN_ID].TRADE_PREVIEW_ADDRESS as `0x${string}`,
     abi: TRADE_PREVIEW_ABI,
     functionName: "previewTrade",
     args,
@@ -139,25 +141,44 @@ export default function TradingForm({ isLong }: { isLong: boolean }) {
   }, [amountFromPreview, form, isError, isLoading, isMax, selectedTokenPair]);
 
   const calculateLeverage = () => {
-    if (!tradeData?.steps || !totalCost || !primePoolPriceData) return null;
+    if (!tradeData?.steps || !totalCost || !primePoolPriceData) {
+      console.log('Missing data for leverage calculation:', {
+        hasTradeData: !!tradeData?.steps,
+        hasTotalCost: !!totalCost,
+        hasPriceData: !!primePoolPriceData
+      });
+      return null;
+    }
 
-    const totalAmount = formatUnits(
-      tradeData.steps[0].amount,
-      isLong ? selectedTokenPair[0].decimals : selectedTokenPair[1].decimals
-    );
+    try {
+      const totalAmount = formatUnits(
+        tradeData.steps[0].amount,
+        isLong ? selectedTokenPair[0].decimals : selectedTokenPair[1].decimals
+      );
 
-    const costInUSDC = isLong
-      ? Big(totalAmount).mul(Big(primePoolPriceData.currentPrice))
-      : Big(totalAmount);
+      const costInUSDC = isLong
+        ? Big(totalAmount).mul(Big(primePoolPriceData.currentPrice))
+        : Big(totalAmount);
 
-    const totalCostInUSDC = formatUnits(
-      totalCost,
-      selectedTokenPair[1].decimals
-    );
+      const totalCostInUSDC = formatUnits(
+        totalCost,
+        selectedTokenPair[1].decimals
+      );
 
-    const leverage = costInUSDC.div(totalCostInUSDC);
+      const leverage = costInUSDC.div(totalCostInUSDC);
+      
+      console.log('Leverage calculation:', {
+        totalAmount,
+        costInUSDC: costInUSDC.toString(),
+        totalCostInUSDC,
+        leverage: leverage.toString()
+      });
 
-    return leverage.toFixed(2);
+      return leverage.toFixed(2);
+    } catch (error) {
+      console.error('Error calculating leverage:', error);
+      return null;
+    }
   };
 
   const leverageValue = calculateLeverage();
@@ -233,7 +254,7 @@ export default function TradingForm({ isLong }: { isLong: boolean }) {
     }
 
     const optionTicks = {
-      _handler: contracts[10143].LIQUIDITY_HANDLER_ADDRESS_USDC,
+      _handler: contracts[CHAIN_ID].LIQUIDITY_HANDLER_ADDRESS_USDC,
       pool: primePool,
       hook: "0x0000000000000000000000000000000000000000",
       tickLower: tradeData.steps[0].tickLower,
@@ -290,7 +311,7 @@ export default function TradingForm({ isLong }: { isLong: boolean }) {
           isLong={isLong}
           className="absolute top-[10px] -left-[18px]"
         /> */}
-        <div className="text-sm font-medium pb-3">
+        <div className="text-white text-lg font-semibold mb-4">
           {isLong ? "You Long" : "You Short"}
         </div>
         <form.Field
@@ -307,13 +328,17 @@ export default function TradingForm({ isLong }: { isLong: boolean }) {
         >
           {(field) => <Input setIsMax={setIsMax} field={field} />}
         </form.Field>
-        <div className="flex mt-2 mb-6 flex-row gap-1 items-center border border-[#282324] rounded-[8px] w-fit px-2 py-1">
+        <div className="flex items-center gap-2 text-[#9CA3AF] text-sm mb-6">
+          <span>-- {selectedTokenPair[1].symbol}</span>
+        </div>
+        
+        <div className="flex items-center gap-2 mb-4 bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg px-3 py-2 w-fit">
           <FlashIcon />
-          <span className="text-sm font-medium text-[#1981F3] bg-[#1a1a1a80]">
-            {leverageValue ? leverageValue + "x Leverage" : "--"}
+          <span className="text-sm font-medium text-[#1981F3]">
+            {leverageValue ? `${leverageValue}x` : amount && Big(amount).gt(0) ? "Calculating..." : "--"}
           </span>
         </div>
-        <div className="text-sm font-medium pb-3">For</div>
+        <div className="text-white text-lg font-semibold mb-4">For</div>
         {/* <BlueStrokeIcon className="absolute bottom-[96px] -left-[20px]" /> */}
         <DurationSelector
           durations={durations}
@@ -326,69 +351,34 @@ export default function TradingForm({ isLong }: { isLong: boolean }) {
             protocolFee={protocolFee}
           />
         </div>
-        <div className="mt-5 mb-3 text-sm font-medium text-white">
-          You Pay{" "}
-          {totalCost
-            ? formatTokenDisplayCondensed(
-                formatUnits(totalCost, selectedTokenPair[1].decimals),
-                selectedTokenPair[1].decimals
-              )
-            : "--"}{" "}
-          {selectedTokenPair[1].symbol}
+        <div className="mb-6">
+          <div className="text-[#9CA3AF] text-sm mb-2">You Pay -- {selectedTokenPair[1].symbol}</div>
+          <div className="bg-[#19DE92] text-[#0D0D0D] text-center py-4 rounded-xl font-semibold text-lg mb-4">
+            {isLong ? "Long " + selectedTokenPair[0].symbol : "Short " + selectedTokenPair[0].symbol}
+          </div>
+          <div className="text-xs text-[#9CA3AF] text-center leading-relaxed">
+            The premium you pay on timelock is used to protect your trade from liquidations even if the asset price goes to 0.
+          </div>
         </div>
 
-        <form.Subscribe
-          selector={(state) => [state.canSubmit, state.isSubmitting]}
-        >
-          {([canSubmit, isSubmitting]) => {
-            return (
-              <>
-                <button
-                  className={cn(
-                    "w-full disabled:opacity-50 cursor-pointer bg-[#19DE92] text-[#0D0D0D] font-medium text-base rounded-[12px] py-3",
-                    isLong ? "bg-[#19DE92]" : "bg-[#EC5058]"
-                  )}
-                  disabled={
-                    (isConnected && !canSubmit) ||
-                    (isConnected && !isChainSupported) ||
-                    isSubmitting ||
-                    isLoading ||
-                    isError ||
-                    isPending
-                  }
-                >
-                  {isLong
-                    ? "Long " + selectedTokenPair[0].symbol
-                    : "Short " + selectedTokenPair[0].symbol}
-                </button>
-                <CreatePositionDialog
-                  positionSize={amount}
-                  leverage={leverageValue}
-                  youPay={totalCost}
-                  premiumCost={premiumCost}
-                  duration={formatDuration(ttlIV[selectedDurationIndex].ttl)}
-                  callAsset={selectedTokenPair[0]}
-                  putAsset={selectedTokenPair[1]}
-                  isLong={isLong}
-                  isOpen={isOpenCreatePositionDialog}
-                  setIsOpen={setIsOpenCreatePositionDialog}
-                  onSubmit={executeTrade}
-                  disabled={
-                    !canSubmit ||
-                    isSubmitting ||
-                    isLoading ||
-                    isError ||
-                    isPending
-                  }
-                />
-              </>
-            );
-          }}
-        </form.Subscribe>
-        <div className="text-xs pt-3 max-w-sm text-center text-[#9CA3AF]">
-          The premium you pay on timelock is used to protect your trade from
-          liquidations even if the asset price goes to 0.
-        </div>
+        <CreatePositionDialog
+          positionSize={amount}
+          leverage={leverageValue}
+          youPay={totalCost}
+          premiumCost={premiumCost}
+          duration={formatDuration(ttlIV[selectedDurationIndex].ttl)}
+          callAsset={selectedTokenPair[0]}
+          putAsset={selectedTokenPair[1]}
+          isLong={isLong}
+          isOpen={isOpenCreatePositionDialog}
+          setIsOpen={setIsOpenCreatePositionDialog}
+          onSubmit={executeTrade}
+          disabled={
+            isLoading ||
+            isError ||
+            isPending
+          }
+        />
       </form>
     </>
   );
